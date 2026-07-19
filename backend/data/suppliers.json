@@ -1,0 +1,58 @@
+[
+  {
+    "id": "SUP-001",
+    "name": "Meridian Logistics Co.",
+    "region": "APAC",
+    "on_time_rate": 100.0,
+    "total_incidents": 0
+  },
+  {
+    "id": "SUP-002",
+    "name": "Atlas Freight Partners",
+    "region": "EU",
+    "on_time_rate": 66.67,
+    "total_incidents": 5
+  },
+  {
+    "id": "SUP-003",
+    "name": "Horizon Components Ltd.",
+    "region": "NA",
+    "on_time_rate": 95.65,
+    "total_incidents": 1
+  },
+  {
+    "id": "SUP-004",
+    "name": "Bluewave Materials",
+    "region": "APAC",
+    "on_time_rate": 95.45,
+    "total_incidents": 1
+  },
+  {
+    "id": "SUP-005",
+    "name": "Crestline Industrial Supply",
+    "region": "NA",
+    "on_time_rate": 100.0,
+    "total_incidents": 0
+  },
+  {
+    "id": "SUP-006",
+    "name": "Norlink Distribution",
+    "region": "EU",
+    "on_time_rate": 86.11,
+    "total_incidents": 5
+  },
+  {
+    "id": "SUP-007",
+    "name": "Pinecrest Manufacturing",
+    "region": "NA",
+    "on_time_rate": 100.0,
+    "total_incidents": 0
+  },
+  {
+    "id": "SUP-008",
+    "name": "Delta Rivers Trading",
+    "region": "APAC",
+    "on_time_rate": 90.91,
+    "total_incidents": 3
+  }
+]

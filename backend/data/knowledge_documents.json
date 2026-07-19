@@ -1,0 +1,247 @@
+[
+  {
+    "doc_label": "SOP-14",
+    "doc_kind": "SOP",
+    "supplier_id": null,
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Handling Shipment Delays: If a shipment delay exceeds 2 days, check alternate warehouse stock before contacting the supplier. If no alternate stock is available, request an updated ETA from the supplier. If the delay exceeds 5 days, escalate to procurement for a backup supplier. Document the root cause for any delay exceeding 3 days."
+  },
+  {
+    "doc_label": "SOP-22",
+    "doc_kind": "SOP",
+    "supplier_id": null,
+    "exception_type": "Stockout",
+    "chunk_text": "Stockout Response Procedure: When inventory falls below the safety stock threshold, first check for surplus stock at other warehouses in the same region. If a transfer is feasible within 48 hours, initiate it immediately. If no transfer is possible, place an expedited reorder with the primary supplier. Notify the affected production or fulfillment team of expected resolution time."
+  },
+  {
+    "doc_label": "SOP-31",
+    "doc_kind": "SOP",
+    "supplier_id": null,
+    "exception_type": null,
+    "chunk_text": "Supplier Reliability Escalation: A supplier is flagged for reliability review if they record more than 3 delivery delays within a rolling 30-day window, or if any single delay exceeds 7 days without a documented external cause. Reliability reviews should consider the supplier's overall on-time rate before recommending contract action."
+  },
+  {
+    "doc_label": "SOP-08",
+    "doc_kind": "SOP",
+    "supplier_id": null,
+    "exception_type": "Quality Issue",
+    "chunk_text": "Quality Issue Handling: Upon receipt of a quality issue report, quarantine the affected batch immediately and notify quality assurance. If the defect rate exceeds 5% of the shipment, reject the batch and request replacement at the supplier's cost per contract terms."
+  },
+  {
+    "doc_label": "SOP-19",
+    "doc_kind": "SOP",
+    "supplier_id": null,
+    "exception_type": "Customs Hold",
+    "chunk_text": "Customs Hold Resolution: For shipments held at customs, verify documentation completeness within 24 hours. Routine inspection holds typically resolve within 3-5 business days and do not require escalation unless the shipment contains temperature-sensitive or time-critical goods."
+  },
+  {
+    "doc_label": "Contract-SUP-001",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-001",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Meridian Logistics Co.): Agreed delivery window: 10 business days from purchase order confirmation. Penalty clause: 3% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 1000 units."
+  },
+  {
+    "doc_label": "Contract-SUP-002",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-002",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Atlas Freight Partners): Agreed delivery window: 5 business days from purchase order confirmation. Penalty clause: 3% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 500 units."
+  },
+  {
+    "doc_label": "Contract-SUP-003",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-003",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Horizon Components Ltd.): Agreed delivery window: 10 business days from purchase order confirmation. Penalty clause: 1% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 500 units."
+  },
+  {
+    "doc_label": "Contract-SUP-004",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-004",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Bluewave Materials): Agreed delivery window: 7 business days from purchase order confirmation. Penalty clause: 2% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 500 units."
+  },
+  {
+    "doc_label": "Contract-SUP-005",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-005",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Crestline Industrial Supply): Agreed delivery window: 6 business days from purchase order confirmation. Penalty clause: 2% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 250 units."
+  },
+  {
+    "doc_label": "Contract-SUP-006",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-006",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Norlink Distribution): Agreed delivery window: 7 business days from purchase order confirmation. Penalty clause: 2% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 500 units."
+  },
+  {
+    "doc_label": "Contract-SUP-007",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-007",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Pinecrest Manufacturing): Agreed delivery window: 5 business days from purchase order confirmation. Penalty clause: 2% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 500 units."
+  },
+  {
+    "doc_label": "Contract-SUP-008",
+    "doc_kind": "Contract",
+    "supplier_id": "SUP-008",
+    "exception_type": null,
+    "chunk_text": "Supplier Contract (Delta Rivers Trading): Agreed delivery window: 10 business days from purchase order confirmation. Penalty clause: 3% cost deduction per day late beyond the agreed window. Force majeure clause: natural disasters, strikes, and government-mandated closures are exempt from penalty, subject to documented evidence. Minimum order quantity: 250 units."
+  },
+  {
+    "doc_label": "Incident #101",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-001",
+    "exception_type": "Quality Issue",
+    "chunk_text": "Incident #101 | Supplier: SUP-001 | Type: Quality Issue | Cause: Incorrect quantity shipped. Resolution: Batch quarantined and rejected; replacement requested at supplier's cost."
+  },
+  {
+    "doc_label": "Incident #102",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #102 | Supplier: SUP-004 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Contacted supplier for updated ETA; customer notified of delay."
+  },
+  {
+    "doc_label": "Incident #103",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-006",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #103 | Supplier: SUP-006 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Transferred stock from alternate warehouse; no stockout occurred."
+  },
+  {
+    "doc_label": "Incident #104",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Stockout",
+    "chunk_text": "Incident #104 | Supplier: SUP-002 | Type: Stockout | Cause: Raw material shortage at supplier factory. Resolution: Transferred surplus stock from a nearby warehouse within 48 hours."
+  },
+  {
+    "doc_label": "Incident #105",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Quality Issue",
+    "chunk_text": "Incident #105 | Supplier: SUP-002 | Type: Quality Issue | Cause: Incorrect quantity shipped. Resolution: Batch quarantined and rejected; replacement requested at supplier's cost."
+  },
+  {
+    "doc_label": "Incident #106",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #106 | Supplier: SUP-002 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Contacted supplier for updated ETA; customer notified of delay."
+  },
+  {
+    "doc_label": "Incident #107",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-005",
+    "exception_type": "Stockout",
+    "chunk_text": "Incident #107 | Supplier: SUP-005 | Type: Stockout | Cause: Raw material shortage at supplier factory. Resolution: Placed expedited reorder with primary supplier per SOP-22."
+  },
+  {
+    "doc_label": "Incident #108",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #108 | Supplier: SUP-004 | Type: Shipment Delay | Cause: Vehicle breakdown during transit. Resolution: Contacted supplier for updated ETA; customer notified of delay."
+  },
+  {
+    "doc_label": "Incident #109",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-007",
+    "exception_type": "Supplier Outage",
+    "chunk_text": "Incident #109 | Supplier: SUP-007 | Type: Supplier Outage | Cause: Supplier production line malfunction. Resolution: Escalated to procurement for alternate sourcing during outage."
+  },
+  {
+    "doc_label": "Incident #110",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-008",
+    "exception_type": "Stockout",
+    "chunk_text": "Incident #110 | Supplier: SUP-008 | Type: Stockout | Cause: Raw material shortage at supplier factory. Resolution: Placed expedited reorder with primary supplier per SOP-22."
+  },
+  {
+    "doc_label": "Incident #111",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Stockout",
+    "chunk_text": "Incident #111 | Supplier: SUP-004 | Type: Stockout | Cause: Raw material shortage at supplier factory. Resolution: Placed expedited reorder with primary supplier per SOP-22."
+  },
+  {
+    "doc_label": "Incident #112",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #112 | Supplier: SUP-002 | Type: Shipment Delay | Cause: Port congestion at origin port. Resolution: Contacted supplier for updated ETA; customer notified of delay."
+  },
+  {
+    "doc_label": "Incident #113",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #113 | Supplier: SUP-004 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Escalated to procurement; backup supplier engaged for future orders."
+  },
+  {
+    "doc_label": "Incident #114",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #114 | Supplier: SUP-002 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Contacted supplier for updated ETA; customer notified of delay."
+  },
+  {
+    "doc_label": "Incident #115",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-006",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #115 | Supplier: SUP-006 | Type: Shipment Delay | Cause: Vehicle breakdown during transit. Resolution: Escalated to procurement; backup supplier engaged for future orders."
+  },
+  {
+    "doc_label": "Incident #116",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #116 | Supplier: SUP-004 | Type: Shipment Delay | Cause: Port congestion at origin port. Resolution: Escalated to procurement; backup supplier engaged for future orders."
+  },
+  {
+    "doc_label": "Incident #117",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-007",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #117 | Supplier: SUP-007 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Transferred stock from alternate warehouse; no stockout occurred."
+  },
+  {
+    "doc_label": "Incident #118",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-005",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #118 | Supplier: SUP-005 | Type: Shipment Delay | Cause: Vehicle breakdown during transit. Resolution: Transferred stock from alternate warehouse; no stockout occurred."
+  },
+  {
+    "doc_label": "Incident #119",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-003",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #119 | Supplier: SUP-003 | Type: Shipment Delay | Cause: Regional highway closure due to flooding. Resolution: Escalated to procurement; backup supplier engaged for future orders."
+  },
+  {
+    "doc_label": "Incident #120",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-004",
+    "exception_type": "Customs Hold",
+    "chunk_text": "Incident #120 | Supplier: SUP-004 | Type: Customs Hold | Cause: Customs inspection hold - routine. Resolution: Documentation resolved within 3 business days; no escalation required."
+  },
+  {
+    "doc_label": "Incident #121",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-006",
+    "exception_type": "Customs Hold",
+    "chunk_text": "Incident #121 | Supplier: SUP-006 | Type: Customs Hold | Cause: Customs inspection hold - routine. Resolution: Expedited customs clearance requested due to time-sensitive goods."
+  },
+  {
+    "doc_label": "Incident #122",
+    "doc_kind": "Incident",
+    "supplier_id": "SUP-002",
+    "exception_type": "Shipment Delay",
+    "chunk_text": "Incident #122 | Supplier: SUP-002 | Type: Shipment Delay | Cause: Port congestion at origin port. Resolution: Escalated to procurement; backup supplier engaged for future orders."
+  }
+]

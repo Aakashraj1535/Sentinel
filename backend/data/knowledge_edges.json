@@ -1,0 +1,262 @@
+[
+  {
+    "from_label": "Contract-SUP-001",
+    "relation": "governs",
+    "to_label": "SUP-001"
+  },
+  {
+    "from_label": "Contract-SUP-002",
+    "relation": "governs",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Contract-SUP-003",
+    "relation": "governs",
+    "to_label": "SUP-003"
+  },
+  {
+    "from_label": "Contract-SUP-004",
+    "relation": "governs",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Contract-SUP-005",
+    "relation": "governs",
+    "to_label": "SUP-005"
+  },
+  {
+    "from_label": "Contract-SUP-006",
+    "relation": "governs",
+    "to_label": "SUP-006"
+  },
+  {
+    "from_label": "Contract-SUP-007",
+    "relation": "governs",
+    "to_label": "SUP-007"
+  },
+  {
+    "from_label": "Contract-SUP-008",
+    "relation": "governs",
+    "to_label": "SUP-008"
+  },
+  {
+    "from_label": "Incident #101",
+    "relation": "caused_by",
+    "to_label": "SUP-001"
+  },
+  {
+    "from_label": "Incident #101",
+    "relation": "applies_to",
+    "to_label": "Quality Issue"
+  },
+  {
+    "from_label": "Incident #102",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #102",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #103",
+    "relation": "caused_by",
+    "to_label": "SUP-006"
+  },
+  {
+    "from_label": "Incident #103",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #104",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #104",
+    "relation": "applies_to",
+    "to_label": "Stockout"
+  },
+  {
+    "from_label": "Incident #105",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #105",
+    "relation": "applies_to",
+    "to_label": "Quality Issue"
+  },
+  {
+    "from_label": "Incident #106",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #106",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #107",
+    "relation": "caused_by",
+    "to_label": "SUP-005"
+  },
+  {
+    "from_label": "Incident #107",
+    "relation": "applies_to",
+    "to_label": "Stockout"
+  },
+  {
+    "from_label": "Incident #108",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #108",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #109",
+    "relation": "caused_by",
+    "to_label": "SUP-007"
+  },
+  {
+    "from_label": "Incident #109",
+    "relation": "applies_to",
+    "to_label": "Supplier Outage"
+  },
+  {
+    "from_label": "Incident #110",
+    "relation": "caused_by",
+    "to_label": "SUP-008"
+  },
+  {
+    "from_label": "Incident #110",
+    "relation": "applies_to",
+    "to_label": "Stockout"
+  },
+  {
+    "from_label": "Incident #111",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #111",
+    "relation": "applies_to",
+    "to_label": "Stockout"
+  },
+  {
+    "from_label": "Incident #112",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #112",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #113",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #113",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #114",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #114",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #115",
+    "relation": "caused_by",
+    "to_label": "SUP-006"
+  },
+  {
+    "from_label": "Incident #115",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #116",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #116",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #117",
+    "relation": "caused_by",
+    "to_label": "SUP-007"
+  },
+  {
+    "from_label": "Incident #117",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #118",
+    "relation": "caused_by",
+    "to_label": "SUP-005"
+  },
+  {
+    "from_label": "Incident #118",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #119",
+    "relation": "caused_by",
+    "to_label": "SUP-003"
+  },
+  {
+    "from_label": "Incident #119",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  },
+  {
+    "from_label": "Incident #120",
+    "relation": "caused_by",
+    "to_label": "SUP-004"
+  },
+  {
+    "from_label": "Incident #120",
+    "relation": "applies_to",
+    "to_label": "Customs Hold"
+  },
+  {
+    "from_label": "Incident #121",
+    "relation": "caused_by",
+    "to_label": "SUP-006"
+  },
+  {
+    "from_label": "Incident #121",
+    "relation": "applies_to",
+    "to_label": "Customs Hold"
+  },
+  {
+    "from_label": "Incident #122",
+    "relation": "caused_by",
+    "to_label": "SUP-002"
+  },
+  {
+    "from_label": "Incident #122",
+    "relation": "applies_to",
+    "to_label": "Shipment Delay"
+  }
+]

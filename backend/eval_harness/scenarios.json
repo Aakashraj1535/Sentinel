@@ -1,0 +1,202 @@
+[
+  {
+    "scenario_id": "EVAL-001",
+    "supplier_id": "SUP-002",
+    "doc_richness": "rich",
+    "quantity": 100,
+    "delay_days": 1,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "Rich docs (Atlas Freight, 3 incidents on file), tiny delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-002",
+    "supplier_id": "SUP-002",
+    "doc_richness": "rich",
+    "quantity": 200,
+    "delay_days": 3,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "Rich docs, moderate delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-003",
+    "supplier_id": "SUP-002",
+    "doc_richness": "rich",
+    "quantity": 400,
+    "delay_days": 4,
+    "warehouse_id": "WH-B (Coimbatore)",
+    "notes": "Rich docs, moderate delay, larger order.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-004",
+    "supplier_id": "SUP-002",
+    "doc_richness": "rich",
+    "quantity": 600,
+    "delay_days": 6,
+    "warehouse_id": "WH-C (Bengaluru)",
+    "notes": "Rich docs, high severity delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-005",
+    "supplier_id": "SUP-002",
+    "doc_richness": "rich",
+    "quantity": 1000,
+    "delay_days": 9,
+    "warehouse_id": "WH-D (Hyderabad)",
+    "notes": "Rich docs, severe delay + large order.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-006",
+    "supplier_id": "SUP-001",
+    "doc_richness": "medium",
+    "quantity": 150,
+    "delay_days": 2,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "Medium docs (contract + 1 incident), small delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-007",
+    "supplier_id": "SUP-001",
+    "doc_richness": "medium",
+    "quantity": 700,
+    "delay_days": 7,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "Medium docs, severe delay.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-008",
+    "supplier_id": "SUP-004",
+    "doc_richness": "medium",
+    "quantity": 300,
+    "delay_days": 3,
+    "warehouse_id": "WH-B (Coimbatore)",
+    "notes": "Medium docs, moderate delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-009",
+    "supplier_id": "SUP-004",
+    "doc_richness": "medium",
+    "quantity": 500,
+    "delay_days": 5,
+    "warehouse_id": "WH-B (Coimbatore)",
+    "notes": "Medium docs, borderline medium/high delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-010",
+    "supplier_id": "SUP-005",
+    "doc_richness": "medium",
+    "quantity": 50,
+    "delay_days": 1,
+    "warehouse_id": "WH-C (Bengaluru)",
+    "notes": "Medium docs, trivial delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-011",
+    "supplier_id": "SUP-005",
+    "doc_richness": "medium",
+    "quantity": 900,
+    "delay_days": 8,
+    "warehouse_id": "WH-C (Bengaluru)",
+    "notes": "Medium docs, severe delay + large order.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-012",
+    "supplier_id": "SUP-006",
+    "doc_richness": "medium",
+    "quantity": 350,
+    "delay_days": 4,
+    "warehouse_id": "WH-D (Hyderabad)",
+    "notes": "Medium docs, moderate delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-013",
+    "supplier_id": "SUP-006",
+    "doc_richness": "medium",
+    "quantity": 800,
+    "delay_days": 6,
+    "warehouse_id": "WH-D (Hyderabad)",
+    "notes": "Medium docs, high severity delay.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-014",
+    "supplier_id": "SUP-003",
+    "doc_richness": "contract_only",
+    "quantity": 100,
+    "delay_days": 2,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "Contract only, no incident history, small delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-015",
+    "supplier_id": "SUP-007",
+    "doc_richness": "contract_only",
+    "quantity": 300,
+    "delay_days": 4,
+    "warehouse_id": "WH-B (Coimbatore)",
+    "notes": "Contract only, moderate delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-016",
+    "supplier_id": "SUP-008",
+    "doc_richness": "contract_only",
+    "quantity": 250,
+    "delay_days": 5,
+    "warehouse_id": "WH-C (Bengaluru)",
+    "notes": "Contract only, moderate-high delay.",
+    "human_expected_escalate": false
+  },
+  {
+    "scenario_id": "EVAL-017",
+    "supplier_id": "SUP-003",
+    "doc_richness": "contract_only",
+    "quantity": 800,
+    "delay_days": 8,
+    "warehouse_id": "WH-D (Hyderabad)",
+    "notes": "Contract only, severe delay + large order.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-018",
+    "supplier_id": "SUP-9B4530",
+    "doc_richness": "none",
+    "quantity": 100,
+    "delay_days": 2,
+    "warehouse_id": "WH-A (Chennai)",
+    "notes": "NO documentation at all (Kumar), small delay. Key calibration test.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-019",
+    "supplier_id": "SUP-9B4530",
+    "doc_richness": "none",
+    "quantity": 300,
+    "delay_days": 4,
+    "warehouse_id": "WH-B (Coimbatore)",
+    "notes": "NO documentation, moderate delay. Key calibration test.",
+    "human_expected_escalate": true
+  },
+  {
+    "scenario_id": "EVAL-020",
+    "supplier_id": "SUP-9B4530",
+    "doc_richness": "none",
+    "quantity": 800,
+    "delay_days": 8,
+    "warehouse_id": "WH-C (Bengaluru)",
+    "notes": "NO documentation, severe delay + large order. Key calibration test \u2014 system should be uncertain and escalate here.",
+    "human_expected_escalate": true
+  }
+]
