@@ -54,12 +54,6 @@ npm run dev
 ### Database
 Make sure PostgreSQL is running on port `5433` with pgvector enabled, then run the provided migration/setup scripts before starting the backend.
 
-## Project Team
-
-- **Aaki** — Information Technology, Easwari Engineering College
-- **Alwin Biju Koshy** — Information Technology, Easwari Engineering College
-- **Guide:** Dr. S. Praveena Rachel Kamala
-
 ## License
 
 This project is developed for academic purposes as part of the final-year curriculum at Easwari Engineering College.
