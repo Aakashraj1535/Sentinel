@@ -16,6 +16,7 @@ import { Route as KnowledgeBaseRouteImport } from './routes/knowledge-base'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ActivityLogRouteImport } from './routes/activity-log'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KnowledgeBaseIndexRouteImport } from './routes/knowledge-base.index'
 import { Route as KnowledgeBaseDocumentIdRouteImport } from './routes/knowledge-base.$documentId'
 import { Route as ExceptionsExceptionIdRouteImport } from './routes/exceptions.$exceptionId'
 
@@ -54,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KnowledgeBaseIndexRoute = KnowledgeBaseIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => KnowledgeBaseRoute,
+} as any)
 const KnowledgeBaseDocumentIdRoute = KnowledgeBaseDocumentIdRouteImport.update({
   id: '/$documentId',
   path: '/$documentId',
@@ -75,17 +81,18 @@ export interface FileRoutesByFullPath {
   '/suppliers': typeof SuppliersRoute
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/knowledge-base/': typeof KnowledgeBaseIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity-log': typeof ActivityLogRoute
   '/audit': typeof AuditRoute
-  '/knowledge-base': typeof KnowledgeBaseRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suppliers': typeof SuppliersRoute
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/knowledge-base': typeof KnowledgeBaseIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +105,7 @@ export interface FileRoutesById {
   '/suppliers': typeof SuppliersRoute
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/knowledge-base/': typeof KnowledgeBaseIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,17 +119,18 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/knowledge-base/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/activity-log'
     | '/audit'
-    | '/knowledge-base'
     | '/notifications'
     | '/sitemap.xml'
     | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/knowledge-base'
   id:
     | '__root__'
     | '/'
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/knowledge-base/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/knowledge-base/': {
+      id: '/knowledge-base/'
+      path: '/'
+      fullPath: '/knowledge-base/'
+      preLoaderRoute: typeof KnowledgeBaseIndexRouteImport
+      parentRoute: typeof KnowledgeBaseRoute
+    }
     '/knowledge-base/$documentId': {
       id: '/knowledge-base/$documentId'
       path: '/$documentId'
@@ -216,10 +233,12 @@ declare module '@tanstack/react-router' {
 
 interface KnowledgeBaseRouteChildren {
   KnowledgeBaseDocumentIdRoute: typeof KnowledgeBaseDocumentIdRoute
+  KnowledgeBaseIndexRoute: typeof KnowledgeBaseIndexRoute
 }
 
 const KnowledgeBaseRouteChildren: KnowledgeBaseRouteChildren = {
   KnowledgeBaseDocumentIdRoute: KnowledgeBaseDocumentIdRoute,
+  KnowledgeBaseIndexRoute: KnowledgeBaseIndexRoute,
 }
 
 const KnowledgeBaseRouteWithChildren = KnowledgeBaseRoute._addFileChildren(
