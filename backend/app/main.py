@@ -11,13 +11,17 @@ Run:  uvicorn app.main:app --reload --port 8000
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from apscheduler.schedulers.background import BackgroundScheduler
+import csv
+import io
 
 from app.db import get_connection, get_dict_cursor
 from app.serializers import (
     serialize_exception, list_exceptions,
     list_suppliers, serialize_supplier, dashboard_summary,
 )
-from app.graph import run_full_pipeline
+from app.graph import run_full_pipeline, process_all_active_exceptions
 from app import document_service
 from app import analytics as analytics_module
 from app.agents import predictive_risk_agent
@@ -33,6 +37,60 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ============================================================
+# AUTOMATIC BACKGROUND PROCESSING
+# ------------------------------------------------------------
+# Instead of relying on someone manually calling /api/run-pipeline or
+# /api/process-active-exceptions, this scheduler quietly runs in the
+# background and does it automatically:
+#   1. detect_exceptions() picks up any newly delayed/pending orders
+#   2. any exception still sitting at 'Active' (not yet resolved) gets
+#      pushed through retrieve -> resolve -> report automatically
+#
+# SCHEDULER_INTERVAL_MINUTES and SCHEDULER_BATCH_LIMIT are kept small on
+# purpose -- this is tuned for a memory-constrained local dev machine
+# (8GB RAM). In a real deployment this job would instead be triggered
+# event-driven (immediately after a new order/exception is detected)
+# and run on proper worker infrastructure (e.g. Celery + Redis), rather
+# than polling on a timer.
+SCHEDULER_INTERVAL_MINUTES = 3
+SCHEDULER_BATCH_LIMIT = 5
+
+scheduler = BackgroundScheduler()
+
+
+def _auto_process_job():
+    try:
+        # Pick up any brand-new exceptions from operational data first.
+        run_full_pipeline()
+    except Exception as e:
+        print(f"[scheduler] run_full_pipeline error: {e}")
+    try:
+        # Then chip away at anything still stuck at 'Active'.
+        process_all_active_exceptions(limit=SCHEDULER_BATCH_LIMIT)
+    except Exception as e:
+        print(f"[scheduler] process_all_active_exceptions error: {e}")
+
+
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.add_job(
+        _auto_process_job,
+        "interval",
+        minutes=SCHEDULER_INTERVAL_MINUTES,
+        id="auto_process_exceptions",
+        replace_existing=True,
+    )
+    scheduler.start()
+    print(f"[scheduler] Auto-processing started: every {SCHEDULER_INTERVAL_MINUTES} min, "
+          f"batch size {SCHEDULER_BATCH_LIMIT}.")
+
+
+@app.on_event("shutdown")
+def stop_scheduler():
+    scheduler.shutdown(wait=False)
 
 
 @app.get("/api/health")
@@ -58,6 +116,43 @@ def get_resolved_exceptions():
     cur.close()
     conn.close()
     return result
+
+
+@app.get("/api/audit-log/export")
+def export_audit_log():
+    """
+    Supports the 'auditability' requirement of a real deployment: every
+    AI decision (detection, retrieval, recommendation, escalation,
+    notification) is already logged in `audit_log`. This just exposes
+    that data as a downloadable CSV -- e.g. for compliance review, or to
+    hand to a company's audit/risk team.
+    """
+    conn = get_connection()
+    cur = get_dict_cursor(conn)
+    cur.execute("""
+        SELECT exception_id, step, summary, timestamp
+        FROM audit_log
+        ORDER BY timestamp ASC
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["Exception ID", "Step", "Summary", "Timestamp"])
+    for r in rows:
+        writer.writerow([
+            r["exception_id"], r["step"], r["summary"],
+            r["timestamp"].isoformat() if r["timestamp"] else "",
+        ])
+    buffer.seek(0)
+
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=audit_log_export.csv"},
+    )
 
 
 @app.get("/api/exceptions/{exception_id}")

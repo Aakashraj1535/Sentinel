@@ -97,6 +97,78 @@ def confidence_label(pct: float) -> str:
     return "Low"
 
 
+# --- Notification stub -----------------------------------------------------
+# Real deployment would send an actual email/Slack/Teams message here via
+# an integration (SMTP, Slack webhook, MS Graph API, etc.). For this
+# project, we simulate that step: log exactly what WOULD be sent and to
+# whom, so the human-in-the-loop workflow is visible and demoable without
+# needing real credentials/infrastructure.
+ESCALATION_ROLE_ROUTING = {
+    "High": "procurement.manager@company.com",
+    "Medium": "supply.chain.analyst@company.com",
+    "Low": "ops.review.queue@company.com",
+}
+
+
+def notify_human_reviewer(exception_id: str, severity: str, escalation_reason: str) -> str:
+    recipient = ESCALATION_ROLE_ROUTING.get(severity, "ops.review.queue@company.com")
+    message = (
+        f"[NOTIFICATION STUB] Would alert: {recipient}\n"
+        f"  Exception: {exception_id} (Severity: {severity})\n"
+        f"  Reason for escalation: {escalation_reason}\n"
+        f"  (In production this would be sent via email/Slack/Teams webhook.)"
+    )
+    print(message)
+    return recipient
+# -----------------------------------------------------------------------
+
+
+# --- Grounding score fix ---------------------------------------------------
+# Problem this addresses (confirmed by eval_harness/run_eval.py on real data):
+# the LLM's self-reported confidence stayed ~80-86% regardless of how much
+# supporting documentation was actually retrieved (even 'none' scored ~80%).
+# This computes a SEPARATE, deterministic grounding score from the RAG
+# agent's own retrieval signals (vector distance + relevance tier + doc
+# count) -- not from the LLM -- and blends it with the LLM's self-reported
+# confidence so that thin/no context pulls the final confidence down.
+GROUNDING_TIER_WEIGHT = {
+    "supplier-linked": 1.0,   # strongest: doc directly tied to this supplier
+    "type-linked": 0.7,       # tied to this exception type generally
+    "similarity": 0.4,        # fallback pure vector-similarity match
+}
+LLM_CONFIDENCE_WEIGHT = 0.6   # blend ratio: 60% LLM self-report
+GROUNDING_WEIGHT = 0.4        # 40% deterministic grounding score
+
+
+def compute_grounding_score(context_docs: list) -> float:
+    """
+    Returns 0-100. Higher = retrieved context more strongly supports an answer.
+    Uses pgvector cosine distance (0=identical, 2=opposite) converted to a
+    similarity percentage, weighted by how structurally relevant each doc is
+    (supplier-linked > type-linked > plain similarity), plus a small bonus
+    for having multiple corroborating documents.
+    """
+    if not context_docs:
+        return 10.0  # nothing retrieved -> essentially ungrounded
+
+    scored = []
+    for d in context_docs:
+        distance = d.get("distance", 2.0)
+        similarity_pct = max(0.0, 1 - (distance / 2.0)) * 100
+        weight = GROUNDING_TIER_WEIGHT.get(d.get("relevance"), 0.4)
+        scored.append(similarity_pct * weight)
+
+    avg_score = sum(scored) / len(scored)
+    coverage_bonus = min(len(context_docs), 5) * 2  # up to +10 for corroboration
+    return round(min(avg_score + coverage_bonus, 100), 1)
+
+
+def blend_confidence(raw_llm_confidence: float, grounding_score: float) -> float:
+    blended = (LLM_CONFIDENCE_WEIGHT * raw_llm_confidence) + (GROUNDING_WEIGHT * grounding_score)
+    return round(min(max(blended, 0), 100), 1)
+# -----------------------------------------------------------------------
+
+
 def resolve_exception(exception_id: str, context_docs: list = None):
     conn = get_connection()
     cur = get_dict_cursor(conn)
@@ -126,6 +198,15 @@ def resolve_exception(exception_id: str, context_docs: list = None):
 
     options = result.get("options", [])[:3]
     root_cause = result.get("root_cause", "Not determined.")
+
+    # Compute grounding score from THIS exception's actual retrieved context
+    # (not from the LLM), then blend it into each option's confidence.
+    grounding_score = compute_grounding_score(context_docs)
+    for opt in options:
+        raw_conf = opt.get("confidence_pct", 0)
+        opt["raw_llm_confidence_pct"] = raw_conf
+        opt["grounding_score"] = grounding_score
+        opt["confidence_pct"] = blend_confidence(raw_conf, grounding_score)
 
     max_confidence = max((o.get("confidence_pct", 0) for o in options), default=0)
 
@@ -160,10 +241,21 @@ def resolve_exception(exception_id: str, context_docs: list = None):
         WHERE id = %s
     """, (root_cause, not escalate, escalation_reason, new_status, exception_id))
 
+    notified_to = None
+    if escalate:
+        notified_to = notify_human_reviewer(exception_id, exception["severity"], escalation_reason)
+        cur.execute("""
+            INSERT INTO audit_log (exception_id, step, summary)
+            VALUES (%s, 'Notified', %s)
+        """, (exception_id, f"Notification sent to {notified_to} (simulated). "
+              f"Reason: {escalation_reason}"))
+
     cur.execute("""
         INSERT INTO audit_log (exception_id, step, summary)
         VALUES (%s, 'Recommended', %s)
-    """, (exception_id, f"Generated {len(options)} option(s), max confidence {max_confidence}%."))
+    """, (exception_id, f"Generated {len(options)} option(s). Grounding score: "
+          f"{grounding_score}% (from {len(context_docs)} retrieved doc(s)). "
+          f"Grounded confidence (final): {max_confidence}%."))
 
     cur.execute("""
         INSERT INTO audit_log (exception_id, step, summary)
