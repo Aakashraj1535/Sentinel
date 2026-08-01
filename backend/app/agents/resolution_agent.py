@@ -97,29 +97,90 @@ def confidence_label(pct: float) -> str:
     return "Low"
 
 
-# --- Notification stub -----------------------------------------------------
-# Real deployment would send an actual email/Slack/Teams message here via
-# an integration (SMTP, Slack webhook, MS Graph API, etc.). For this
-# project, we simulate that step: log exactly what WOULD be sent and to
-# whom, so the human-in-the-loop workflow is visible and demoable without
-# needing real credentials/infrastructure.
+# --- Notification (real email via SMTP) -------------------------------
+# Sends a real email when an exception escalates. Credentials come from
+# environment variables (never hardcode them in source) -- if they're not
+# set, or sending fails for any reason, this safely falls back to the
+# printed/logged stub so the pipeline never breaks because of a
+# notification problem.
+#
+# Setup (Gmail example):
+#   1. Enable 2-factor auth on the Gmail account
+#   2. Create an "App Password" at https://myaccount.google.com/apppasswords
+#   3. Set these before starting uvicorn (e.g. in your terminal, or a .env
+#      loaded by your app):
+#        export SCS_SMTP_EMAIL="youraccount@gmail.com"
+#        export SCS_SMTP_APP_PASSWORD="xxxx xxxx xxxx xxxx"
+#        export SCS_NOTIFY_TO="your.real.inbox@gmail.com"   # where alerts land
+import os
+import smtplib
+from email.mime.text import MIMEText
+
 ESCALATION_ROLE_ROUTING = {
     "High": "procurement.manager@company.com",
     "Medium": "supply.chain.analyst@company.com",
     "Low": "ops.review.queue@company.com",
 }
 
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 587
+
+
+def _send_email(to_address: str, subject: str, body: str) -> bool:
+    sender = os.environ.get("SCS_SMTP_EMAIL")
+    app_password = os.environ.get("SCS_SMTP_APP_PASSWORD")
+    if not sender or not app_password:
+        return False  # not configured -> caller falls back to stub
+
+    # Gmail's app-password page sometimes copies with non-breaking spaces
+    # (U+00A0) instead of regular spaces between the 4-char groups, which
+    # breaks ASCII-only SMTP auth. Strip ALL whitespace defensively.
+    app_password = "".join(app_password.split())
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = to_address
+
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+            server.starttls()
+            server.login(sender, app_password)
+            server.sendmail(sender, [to_address], msg.as_string())
+        return True
+    except Exception as e:
+        print(f"[email] Failed to send notification: {e}")
+        return False
+
 
 def notify_human_reviewer(exception_id: str, severity: str, escalation_reason: str) -> str:
-    recipient = ESCALATION_ROLE_ROUTING.get(severity, "ops.review.queue@company.com")
-    message = (
-        f"[NOTIFICATION STUB] Would alert: {recipient}\n"
-        f"  Exception: {exception_id} (Severity: {severity})\n"
-        f"  Reason for escalation: {escalation_reason}\n"
-        f"  (In production this would be sent via email/Slack/Teams webhook.)"
+    role_label = ESCALATION_ROLE_ROUTING.get(severity, "ops.review.queue@company.com")
+    # Real inbox to actually deliver to (demo-friendly single override);
+    # falls back to the role-based address if not set.
+    real_recipient = os.environ.get("SCS_NOTIFY_TO", role_label)
+
+    subject = f"[Sentinel] {severity} severity exception escalated — {exception_id}"
+    body = (
+        f"Exception ID: {exception_id}\n"
+        f"Severity: {severity}\n"
+        f"Reason for escalation: {escalation_reason}\n\n"
+        f"This exception requires human review. Please check the dashboard.\n"
+        f"(Sent automatically by Supply Chain Sentinel's Resolution Agent.)"
     )
-    print(message)
-    return recipient
+
+    sent = _send_email(real_recipient, subject, body)
+
+    if sent:
+        print(f"[email] Sent real notification to {real_recipient} for {exception_id}.")
+    else:
+        print(
+            f"[NOTIFICATION STUB] Would alert: {real_recipient}\n"
+            f"  Exception: {exception_id} (Severity: {severity})\n"
+            f"  Reason for escalation: {escalation_reason}\n"
+            f"  (SCS_SMTP_EMAIL / SCS_SMTP_APP_PASSWORD not set, or send failed "
+            f"-- falling back to simulated notification.)"
+        )
+    return real_recipient
 # -----------------------------------------------------------------------
 
 
@@ -228,11 +289,13 @@ def resolve_exception(exception_id: str, context_docs: list = None):
         cur.execute("""
             INSERT INTO recommendations
                 (exception_id, rank, action, estimated_cost, estimated_delivery,
-                 customer_impact, confidence_pct, confidence_level)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                 customer_impact, confidence_pct, confidence_level,
+                 raw_llm_confidence_pct, grounding_score)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (exception_id, i, opt.get("action", ""), opt.get("estimated_cost", ""),
               opt.get("estimated_delivery", ""), opt.get("customer_impact", ""),
-              conf_pct, confidence_label(conf_pct)))
+              conf_pct, confidence_label(conf_pct),
+              opt.get("raw_llm_confidence_pct"), opt.get("grounding_score")))
 
     new_status = "Escalated" if escalate else "Resolved"
     cur.execute("""

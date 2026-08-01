@@ -158,7 +158,7 @@ def insert_scenarios(cur, conn, scenarios: list[dict]):
 
 def run_pipeline():
     print("Calling /api/run-pipeline ... (this triggers detection + RAG + LLM resolution, may take a minute)")
-    resp = requests.post(f"{API_BASE}/api/run-pipeline", timeout=300)
+    resp = requests.post(f"{API_BASE}/api/run-pipeline", timeout=1200)
     resp.raise_for_status()
     data = resp.json()
     print(f"Pipeline processed {data.get('processed')} exception(s).")
@@ -182,17 +182,22 @@ def fetch_results(cur, scenarios: list[dict]) -> list[dict]:
             continue
 
         cur.execute("""
-            SELECT confidence_pct FROM recommendations
+            SELECT confidence_pct, raw_llm_confidence_pct, grounding_score
+            FROM recommendations
             WHERE exception_id = %s ORDER BY rank ASC LIMIT 1
         """, (exc["exception_id"],))
         rec = cur.fetchone()
         confidence = float(rec["confidence_pct"]) if rec and rec["confidence_pct"] is not None else None
+        raw_confidence = float(rec["raw_llm_confidence_pct"]) if rec and rec.get("raw_llm_confidence_pct") is not None else None
+        grounding = float(rec["grounding_score"]) if rec and rec.get("grounding_score") is not None else None
 
         rows.append({
             **s,
             "system_severity": exc["severity"],
             "system_escalated": (not exc["auto_resolved"]),
             "confidence_pct": confidence,
+            "raw_llm_confidence_pct": raw_confidence,
+            "grounding_score": grounding,
             "escalation_reason": exc["escalation_reason"],
         })
     return rows
@@ -211,7 +216,8 @@ def score_and_report(rows: list[dict]):
 
     fieldnames = ["scenario_id", "supplier_id", "doc_richness", "quantity", "delay_days",
                   "expected_severity", "system_severity", "severity_match",
-                  "confidence_pct", "system_escalated", "baseline_escalate",
+                  "confidence_pct", "raw_llm_confidence_pct", "grounding_score",
+                  "system_escalated", "baseline_escalate",
                   "human_expected_escalate", "system_agrees_with_human",
                   "baseline_agrees_with_human", "escalation_reason", "notes"]
 
