@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuppliersRouteImport } from './routes/suppliers'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as KnowledgeBaseRouteImport } from './routes/knowledge-base'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ActivityLogRouteImport } from './routes/activity-log'
@@ -33,6 +34,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeBaseRoute = KnowledgeBaseRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/activity-log': typeof ActivityLogRoute
   '/audit': typeof AuditRoute
   '/knowledge-base': typeof KnowledgeBaseRouteWithChildren
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suppliers': typeof SuppliersRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity-log': typeof ActivityLogRoute
   '/audit': typeof AuditRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suppliers': typeof SuppliersRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/activity-log': typeof ActivityLogRoute
   '/audit': typeof AuditRoute
   '/knowledge-base': typeof KnowledgeBaseRouteWithChildren
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/suppliers': typeof SuppliersRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/activity-log'
     | '/audit'
     | '/knowledge-base'
+    | '/login'
     | '/notifications'
     | '/sitemap.xml'
     | '/suppliers'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activity-log'
     | '/audit'
+    | '/login'
     | '/notifications'
     | '/sitemap.xml'
     | '/suppliers'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/activity-log'
     | '/audit'
     | '/knowledge-base'
+    | '/login'
     | '/notifications'
     | '/sitemap.xml'
     | '/suppliers'
@@ -150,6 +162,7 @@ export interface RootRouteChildren {
   ActivityLogRoute: typeof ActivityLogRoute
   AuditRoute: typeof AuditRoute
   KnowledgeBaseRoute: typeof KnowledgeBaseRouteWithChildren
+  LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SuppliersRoute: typeof SuppliersRoute
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/knowledge-base': {
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivityLogRoute: ActivityLogRoute,
   AuditRoute: AuditRoute,
   KnowledgeBaseRoute: KnowledgeBaseRouteWithChildren,
+  LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SuppliersRoute: SuppliersRoute,

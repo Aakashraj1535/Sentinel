@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { isAuthenticated } from "../lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 
@@ -125,14 +128,35 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// --- Auth guard --------------------------------------------------------
+// Demo-level access control: if there's no valid session, redirect to
+// /login for every route except /login itself. See src/lib/auth.ts for
+// the (intentionally simple) credential check.
+function AuthGuard({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isAuthenticated() && pathname !== "/login") {
+      navigate({ to: "/login" });
+    }
+  }, [pathname]);
+
+  return <>{children}</>;
+}
+// -----------------------------------------------------------------------
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthGuard>
+        <Outlet />
+      </AuthGuard>
       <Toaster />
     </QueryClientProvider>
   );
 }
-

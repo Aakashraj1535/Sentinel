@@ -1,3 +1,4 @@
+cat > /Users/aakashraj/Downloads/scs-backend/eval_harness/live_add.py << 'EOF'
 """
 Live Demo Add-On
 =================
@@ -23,18 +24,21 @@ from app.db import get_connection, get_dict_cursor  # noqa: E402
 
 API_BASE = "http://localhost:8000"
 
+SUPPLIER_POOL = ["SUP-001", "SUP-002", "SUP-004", "SUP-006"]
+
 
 def main():
+    random.seed()
     conn = get_connection()
     cur = get_dict_cursor(conn)
 
     order_id = f"LIVE-{random.randint(1000, 9999)}"
-    supplier_id = "SUP-002"  # Atlas Freight -- well documented, good clean demo case
+    supplier_id = random.choice(SUPPLIER_POOL)
     now = datetime.now(timezone.utc)
     expected_delivery = now - timedelta(days=1)
     actual_delivery = now  # 1 day late, happening "right now"
 
-    print(f"Creating new order {order_id} (Atlas Freight, 1 day delayed)...")
+    print(f"Creating new order {order_id} (supplier {supplier_id}, 1 day delayed)...")
     cur.execute("""
         INSERT INTO orders (id, supplier_id, item, quantity, warehouse_id,
                              expected_delivery, actual_delivery, status)
@@ -55,3 +59,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+EOF
