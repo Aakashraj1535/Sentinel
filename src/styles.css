@@ -50,7 +50,7 @@
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.375rem;
 
   /* Neutral canvas */
   --background: oklch(0.985 0.003 250);
@@ -62,50 +62,50 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.03 258);
 
-  /* Navy primary */
-  --primary: oklch(0.32 0.07 258);
-  --primary-foreground: oklch(0.985 0.003 250);
+  /* Confident vivid blue primary (was muted navy) */
+  --primary: oklch(0.546 0.245 262.881);
+  --primary-foreground: oklch(0.99 0 0);
 
   --secondary: oklch(0.965 0.006 250);
   --secondary-foreground: oklch(0.28 0.04 258);
 
-  --muted: oklch(0.965 0.006 250);
+  --muted: oklch(0.97 0.004 255);
   --muted-foreground: oklch(0.52 0.02 258);
 
   --accent: oklch(0.955 0.012 255);
   --accent-foreground: oklch(0.28 0.04 258);
 
   /* Status semantic tokens */
-  --success: oklch(0.62 0.14 155);
+  --success: oklch(0.6 0.16 152);
   --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.78 0.14 78);
-  --warning-foreground: oklch(0.25 0.05 60);
-  --danger: oklch(0.58 0.19 27);
+  --warning: oklch(0.7 0.17 55);
+  --warning-foreground: oklch(0.99 0 0);
+  --danger: oklch(0.58 0.22 27);
   --danger-foreground: oklch(0.99 0 0);
-  --info: oklch(0.58 0.12 245);
+  --info: oklch(0.546 0.245 262.881);
   --info-foreground: oklch(0.99 0 0);
 
   --destructive: var(--danger);
   --destructive-foreground: var(--danger-foreground);
 
-  --border: oklch(0.918 0.008 255);
-  --input: oklch(0.918 0.008 255);
-  --ring: oklch(0.55 0.08 258);
+  --border: oklch(0.91 0.006 255);
+  --input: oklch(0.91 0.006 255);
+  --ring: oklch(0.546 0.245 262.881);
 
-  --chart-1: oklch(0.32 0.07 258);
-  --chart-2: oklch(0.62 0.14 155);
-  --chart-3: oklch(0.78 0.14 78);
-  --chart-4: oklch(0.58 0.19 27);
-  --chart-5: oklch(0.58 0.12 245);
+  --chart-1: oklch(0.546 0.245 262.881);
+  --chart-2: oklch(0.6 0.16 152);
+  --chart-3: oklch(0.7 0.17 55);
+  --chart-4: oklch(0.58 0.22 27);
+  --chart-5: oklch(0.55 0.12 300);
 
-  --sidebar: oklch(0.24 0.04 258);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-primary: oklch(0.58 0.12 245);
+  --sidebar: oklch(0.19 0.025 258);
+  --sidebar-foreground: oklch(0.9 0.008 250);
+  --sidebar-primary: oklch(0.546 0.245 262.881);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.32 0.05 258);
+  --sidebar-accent: oklch(0.27 0.03 258);
   --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.32 0.05 258);
-  --sidebar-ring: oklch(0.55 0.08 258);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.546 0.245 262.881);
 }
 
 .dark {
@@ -116,8 +116,8 @@
   --card-foreground: oklch(0.96 0.005 250);
   --popover: oklch(0.2 0.03 258);
   --popover-foreground: oklch(0.96 0.005 250);
-  --primary: oklch(0.75 0.09 245);
-  --primary-foreground: oklch(0.18 0.03 258);
+  --primary: oklch(0.65 0.2 262.881);
+  --primary-foreground: oklch(0.14 0.02 258);
   --secondary: oklch(0.26 0.03 258);
   --secondary-foreground: oklch(0.96 0.005 250);
   --muted: oklch(0.26 0.03 258);
@@ -126,7 +126,7 @@
   --accent-foreground: oklch(0.96 0.005 250);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.55 0.08 258);
+  --ring: oklch(0.65 0.2 262.881);
 }
 
 @layer base {
@@ -138,6 +138,13 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+  /* Flatter, thin-border card style instead of heavy drop shadows,
+     for a denser real-world ops-tool feel rather than a marketing-site
+     look. Any component using shadow-md/shadow-lg utility classes
+     directly in JSX will still need those classes removed there. */
+  .card, [class*="rounded-xl"][class*="border"] {
+    box-shadow: none;
   }
 }
 
