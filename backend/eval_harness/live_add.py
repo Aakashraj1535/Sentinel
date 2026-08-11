@@ -22,7 +22,7 @@ from datetime import datetime, timedelta, timezone
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.db import get_connection, get_dict_cursor  # noqa: E402
 
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8080"
 
 SUPPLIER_POOL = ["SUP-001", "SUP-002", "SUP-004", "SUP-006"]
 

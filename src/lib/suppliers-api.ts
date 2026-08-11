@@ -1,6 +1,6 @@
 import type { Supplier } from "./mock-api";
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "http://localhost:8080";
 
 export interface AddSupplierInput {
   name: string;

@@ -1,9 +1,9 @@
-// API layer — calling the real FastAPI backend at localhost:8000
+// API layer — calling the real FastAPI backend at localhost:8080
 // instead of returning hardcoded mock data. All UI components still
 // import from this module only, and the function signatures/types
 // are unchanged, so no component code needs to change.
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "http://localhost:8080/api";
 
 export type Severity = "Low" | "Medium" | "High";
 export type ExceptionStatus = "Active" | "Resolved" | "Escalated";

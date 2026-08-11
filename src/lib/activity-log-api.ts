@@ -5,7 +5,8 @@ export type ActivityStep =
   | "Retrieved"
   | "Recommended"
   | "Decided"
-  | "Reported";
+  | "Reported"
+  | "Notified";
 
 export interface ActivityLogEntry {
   step: ActivityStep;

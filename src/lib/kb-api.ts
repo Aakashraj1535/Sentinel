@@ -1,4 +1,4 @@
-export const KB_API_BASE = "http://localhost:8000";
+export const KB_API_BASE = "http://localhost:8080";
 
 export type DocType = "Contract" | "SOP" | "Purchase Order" | "Invoice" | "Policy";
 export type DocStatus = "Processing" | "Indexed" | "Failed";

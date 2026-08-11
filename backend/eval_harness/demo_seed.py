@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.db import get_connection, get_dict_cursor  # noqa: E402
 
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8080"
 
 
 def _find_dependent_tables(cur, target_table: str, target_col: str = "id"):

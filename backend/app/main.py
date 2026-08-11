@@ -6,7 +6,7 @@ Endpoint shapes match src/lib/mock-api.ts exactly, so the frontend
 only needs to swap its mock functions for fetch() calls — no
 component changes required.
 
-Run:  uvicorn app.main:app --reload --port 8000
+Run:  uvicorn app.main:app --reload --port 8080
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks

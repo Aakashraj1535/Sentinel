@@ -1,5 +1,5 @@
 // Real FastAPI backend calls.
-export const API_BASE = "http://localhost:8000";
+export const API_BASE = "http://localhost:8080";
 
 export interface RunPipelineResponse {
   processed: number;

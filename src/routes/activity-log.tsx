@@ -7,6 +7,7 @@ import {
   Search,
   Sparkles,
   Send,
+  Bell,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import {
@@ -152,6 +153,11 @@ const stepConfig: Record<
     icon: Send,
     label: "Reported",
     tone: "muted",
+  },
+  Notified: {
+    icon: Bell,
+    label: "Notified",
+    tone: "warning",
   },
 };
 

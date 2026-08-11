@@ -37,7 +37,7 @@ from app.db import get_connection, get_dict_cursor  # noqa: E402
 
 SCENARIOS_PATH = Path(__file__).parent / "scenarios.json"
 RESULTS_PATH = Path(__file__).parent / "results.csv"
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8080"
 
 
 # ---- Same severity formula as monitoring_agent.py, kept in sync manually ----
