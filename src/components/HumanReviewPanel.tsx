@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Loader2, MessageSquarePlus, ThumbsDown, ThumbsUp, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Lock, MessageSquarePlus, ThumbsDown, ThumbsUp, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "@tanstack/react-router";
 import {
@@ -8,6 +8,7 @@ import {
   type ExceptionWithReview,
   type HumanDecision,
 } from "@/lib/human-review-api";
+import { hasRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 function fmt(iso: string) {
@@ -23,6 +24,7 @@ export function HumanReviewPanel({ exception }: { exception: ExceptionWithReview
   const [addingNote, setAddingNote] = useState(false);
   const [decisionNote, setDecisionNote] = useState("");
   const [submitting, setSubmitting] = useState<HumanDecision | null>(null);
+  const canReview = hasRole("Procurement Manager");
 
   const alreadyDecided = !!exception.humanDecision;
 
@@ -37,8 +39,8 @@ export function HumanReviewPanel({ exception }: { exception: ExceptionWithReview
       toast.success("Note added");
       setNote("");
       await router.invalidate();
-    } catch {
-      toast.error("Failed to add note. Please try again.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add note. Please try again.");
     } finally {
       setAddingNote(false);
     }
@@ -51,11 +53,32 @@ export function HumanReviewPanel({ exception }: { exception: ExceptionWithReview
       toast.success("Decision recorded");
       setDecisionNote("");
       await router.invalidate();
-    } catch {
-      toast.error("Failed to record decision. Please try again.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to record decision. Please try again.");
     } finally {
       setSubmitting(null);
     }
+  }
+
+  if (!canReview) {
+    return (
+      <section className="rounded-lg border border-border bg-surface p-5 no-print">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+          <MessageSquarePlus className="h-4 w-4 text-muted-foreground" />
+          Human Review
+        </h2>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Lock className="h-3.5 w-3.5" />
+          Viewing as read-only. Sign in as a Procurement Manager or Admin to
+          add notes or approve/reject recommendations.
+        </p>
+        {alreadyDecided && (
+          <div className="mt-4 border-t border-border pt-4">
+            <DecisionSummary exception={exception} />
+          </div>
+        )}
+      </section>
+    );
   }
 
   return (

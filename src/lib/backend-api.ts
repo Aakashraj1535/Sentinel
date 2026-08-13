@@ -1,5 +1,13 @@
 // Real FastAPI backend calls.
+import { getRole } from "@/lib/auth";
+
 export const API_BASE = "http://localhost:8080";
+
+/** Attaches the signed-in user's role so the backend's RBAC layer
+ * (app/auth.py) can enforce it — not just the UI hiding a button. */
+export function roleHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  return { "X-User-Role": getRole(), ...extra };
+}
 
 export interface RunPipelineResponse {
   processed: number;
@@ -7,7 +15,11 @@ export interface RunPipelineResponse {
 }
 
 export async function runPipeline(): Promise<RunPipelineResponse> {
-  const res = await fetch(`${API_BASE}/api/run-pipeline`, { method: "POST" });
+  const res = await fetch(`${API_BASE}/api/run-pipeline`, {
+    method: "POST",
+    headers: roleHeaders(),
+  });
+  if (res.status === 403) throw new Error("You don't have permission to run the pipeline.");
   if (!res.ok) throw new Error("Pipeline failed");
   return res.json();
 }

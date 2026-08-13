@@ -73,8 +73,15 @@ function LoginPage() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Demo credentials — username: <code>admin</code>, password:{" "}
-          <code>sentinel2026</code>
+          Demo accounts (password for all: <code>sentinel2026</code>):
+          <br />
+          <code>viewer</code> — Viewer (read-only)
+          <br />
+          <code>manager</code> — Procurement Manager (can approve/reject, add
+          notes, trigger pipeline runs)
+          <br />
+          <code>admin</code> — Admin (also manages suppliers and the
+          knowledge base)
         </p>
       </form>
     </div>

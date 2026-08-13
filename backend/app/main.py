@@ -9,7 +9,7 @@ component changes required.
 Run:  uvicorn app.main:app --reload --port 8080
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -26,6 +26,7 @@ from app import document_service
 from app import analytics as analytics_module
 from app.agents import predictive_risk_agent
 from app.agents import pattern_detection_agent
+from app.auth import require_role
 
 app = FastAPI(title="Supply Chain Sentinel API")
 
@@ -182,6 +183,7 @@ def create_supplier(
     name: str = Form(...),
     region: str = Form(...),
     on_time_rate: float = Form(100.0),
+    _role: str = Depends(require_role("Admin")),
 ):
     """
     Adds a new supplier from the dashboard. New suppliers start with
@@ -210,7 +212,12 @@ def create_supplier(
 # ============================================================
 
 @app.post("/api/exceptions/{exception_id}/note")
-def add_exception_note(exception_id: str, note: str = Form(...), author: str = Form("Demo User")):
+def add_exception_note(
+    exception_id: str,
+    note: str = Form(...),
+    author: str = Form("Demo User"),
+    _role: str = Depends(require_role("Procurement Manager")),
+):
     """Adds a manual human note to an exception's audit trail."""
     conn = get_connection()
     cur = get_dict_cursor(conn)
@@ -236,6 +243,7 @@ def record_human_decision(
     decision: str = Form(...),   # "Approved" | "Rejected"
     note: str = Form(""),
     decided_by: str = Form("Demo User"),
+    _role: str = Depends(require_role("Procurement Manager")),
 ):
     """
     Records a human's final decision on an escalated (or any) exception —
@@ -328,7 +336,7 @@ def get_dashboard_summary():
 
 
 @app.post("/api/run-pipeline")
-def trigger_pipeline():
+def trigger_pipeline(_role: str = Depends(require_role("Procurement Manager"))):
     """
     Runs the full detect -> retrieve -> resolve -> report pipeline.
     Useful for a "Check for new exceptions" button on the dashboard,
@@ -342,7 +350,11 @@ def trigger_pipeline():
 
 
 @app.post("/api/process-active-exceptions")
-def trigger_process_active(background_tasks: BackgroundTasks, limit: int = None):
+def trigger_process_active(
+    background_tasks: BackgroundTasks,
+    limit: int = None,
+    _role: str = Depends(require_role("Procurement Manager")),
+):
     """
     Catches up exceptions still stuck at 'Active' status. Runs as a
     background task. Optionally pass ?limit=5 to process only a small
@@ -437,11 +449,18 @@ def upload_document(
     doc_type: str = Form(...),
     supplier_id: str = Form(None),
     uploaded_by: str = Form("Demo User"),
+    _role: str = Depends(require_role("Admin")),
 ):
     file_bytes = file.file.read()
-    doc_id, storage_path = document_service.save_uploaded_file(file_bytes, file.filename)
+    try:
+        doc_id, storage_path, safe_file_name = document_service.save_uploaded_file(
+            file_bytes, file.filename
+        )
+    except document_service.UploadValidationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     document_service.create_document_record(
-        doc_id, file.filename, doc_type, supplier_id or None,
+        doc_id, safe_file_name, doc_type, supplier_id or None,
         uploaded_by, len(file_bytes), storage_path,
     )
     # Index in the background so the upload request returns immediately
@@ -471,7 +490,7 @@ def get_document(document_id: str):
 
 
 @app.delete("/api/documents/{document_id}")
-def delete_document(document_id: str):
+def delete_document(document_id: str, _role: str = Depends(require_role("Admin"))):
     conn = get_connection()
     cur = get_dict_cursor(conn)
     cur.execute("SELECT id FROM documents WHERE id = %s", (document_id,))
@@ -486,7 +505,11 @@ def delete_document(document_id: str):
 
 
 @app.post("/api/documents/{document_id}/reindex")
-def reindex_document(document_id: str, background_tasks: BackgroundTasks):
+def reindex_document(
+    document_id: str,
+    background_tasks: BackgroundTasks,
+    _role: str = Depends(require_role("Admin")),
+):
     conn = get_connection()
     cur = get_dict_cursor(conn)
     cur.execute("SELECT id FROM documents WHERE id = %s", (document_id,))

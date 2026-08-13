@@ -9,6 +9,7 @@ import {
   Eye,
   FileText,
   Files,
+  Lock,
   Plus,
   Search,
   Trash2,
@@ -31,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { hasRole } from "@/lib/auth";
 import {
   DOC_TYPES,
   KB_API_BASE,
@@ -70,6 +72,7 @@ function KnowledgeBasePage() {
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<DocumentRecord | null>(null);
+  const canManageDocs = hasRole("Admin");
   const pollTimers = useRef<Map<string, number>>(new Map());
 
   const loadSummary = useCallback(() => {
@@ -171,10 +174,17 @@ function KnowledgeBasePage() {
             resolution.
           </p>
         </div>
-        <Button onClick={() => setUploadOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Upload document
-        </Button>
+        {canManageDocs ? (
+          <Button onClick={() => setUploadOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Upload document
+          </Button>
+        ) : (
+          <Button variant="outline" disabled title="Sign in as Admin to upload documents.">
+            <Lock className="h-4 w-4" />
+            Upload document
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">
@@ -315,13 +325,15 @@ function KnowledgeBasePage() {
                         >
                           <Download className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => setConfirmDelete(d)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-danger/10 hover:text-danger"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {canManageDocs && (
+                          <button
+                            onClick={() => setConfirmDelete(d)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-danger/10 hover:text-danger"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

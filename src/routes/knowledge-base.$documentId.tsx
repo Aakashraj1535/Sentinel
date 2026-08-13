@@ -24,6 +24,7 @@ import {
   type ChatLanguage,
   type DocumentRecord,
 } from "@/lib/kb-api";
+import { hasRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/knowledge-base/$documentId")({
   head: () => ({
@@ -57,6 +58,7 @@ function DocumentDetailPage() {
   const [doc, setDoc] = useState<DocumentRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [reindexing, setReindexing] = useState(false);
+  const canManageDocs = hasRole("Admin");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
@@ -149,18 +151,20 @@ function DocumentDetailPage() {
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleReindex}
-              disabled={reindexing}
-            >
-              {reindexing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              Reindex
-            </Button>
+            {canManageDocs && (
+              <Button
+                variant="outline"
+                onClick={handleReindex}
+                disabled={reindexing}
+              >
+                {reindexing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Reindex
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">

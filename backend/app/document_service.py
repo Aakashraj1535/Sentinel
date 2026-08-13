@@ -15,6 +15,7 @@ document's chunks only, answered by the local LLM.
 """
 
 import os
+import re
 import uuid
 import requests
 
@@ -28,6 +29,17 @@ os.makedirs(STORAGE_DIR, exist_ok=True)
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
 
+# Matches document_processing.extract_text's supported extensions — reject
+# anything else up front instead of letting a bad file sit in storage until
+# indexing fails on it.
+ALLOWED_EXTENSIONS = {"pdf", "docx", "txt", "csv", "xlsx", "xls"}
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB — generous for contracts/SOPs, not for junk
+
+
+class UploadValidationError(ValueError):
+    """Raised when an uploaded file fails type/size validation."""
+
+
 # Maps a Knowledge Base doc_type to the doc_kind used in knowledge_documents,
 # so uploaded docs slot into the same categories the RAG agent already knows.
 DOC_TYPE_TO_KIND = {
@@ -39,14 +51,56 @@ DOC_TYPE_TO_KIND = {
 }
 
 
+def _sanitize_file_name(file_name: str) -> str:
+    """
+    Strips any directory components (so a filename like '../../etc/passwd'
+    or 'C:\\Windows\\win.ini' can't escape STORAGE_DIR) and drops characters
+    outside a safe allowlist, keeping the extension intact.
+    """
+    base = os.path.basename(file_name or "").strip()
+    if not base:
+        raise UploadValidationError("Missing file name.")
+    base = base.replace("\\", "_")
+    base = re.sub(r"[^A-Za-z0-9._ -]", "_", base)
+    return base[:200]  # keep storage paths reasonable
+
+
+def validate_upload(file_bytes: bytes, file_name: str) -> str:
+    """
+    Validates extension and size before anything touches disk.
+    Returns the sanitized file name to actually use.
+    Raises UploadValidationError with a user-facing message on failure.
+    """
+    safe_name = _sanitize_file_name(file_name)
+    ext = safe_name.lower().rsplit(".", 1)[-1] if "." in safe_name else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        raise UploadValidationError(
+            f"Unsupported file type '.{ext}'. Allowed types: "
+            f"{', '.join(sorted(ALLOWED_EXTENSIONS))}."
+        )
+    if len(file_bytes) == 0:
+        raise UploadValidationError("Uploaded file is empty.")
+    if len(file_bytes) > MAX_UPLOAD_BYTES:
+        raise UploadValidationError(
+            f"File is too large ({len(file_bytes) / (1024*1024):.1f} MB). "
+            f"Max allowed is {MAX_UPLOAD_BYTES / (1024*1024):.0f} MB."
+        )
+    return safe_name
+
+
 def save_uploaded_file(file_bytes: bytes, file_name: str) -> tuple:
-    """Saves the raw uploaded file to disk. Returns (document_id, storage_path)."""
+    """
+    Validates, then saves the raw uploaded file to disk.
+    Returns (document_id, storage_path, sanitized_file_name).
+    Raises UploadValidationError on invalid type/size/name.
+    """
+    safe_name = validate_upload(file_bytes, file_name)
     doc_id = f"DOC-{uuid.uuid4().hex[:8]}"
-    safe_name = f"{doc_id}_{file_name}"
-    path = os.path.join(STORAGE_DIR, safe_name)
+    stored_name = f"{doc_id}_{safe_name}"
+    path = os.path.join(STORAGE_DIR, stored_name)
     with open(path, "wb") as f:
         f.write(file_bytes)
-    return doc_id, path
+    return doc_id, path, safe_name
 
 
 def create_document_record(doc_id, file_name, doc_type, supplier_id,

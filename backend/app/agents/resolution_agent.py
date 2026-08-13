@@ -310,7 +310,7 @@ def resolve_exception(exception_id: str, context_docs: list = None):
         cur.execute("""
             INSERT INTO audit_log (exception_id, step, summary)
             VALUES (%s, 'Notified', %s)
-        """, (exception_id, f"Notification sent to {notified_to} (simulated). "
+        """, (exception_id, f"Escalation notification sent to {notified_to}. "
               f"Reason: {escalation_reason}"))
 
     cur.execute("""

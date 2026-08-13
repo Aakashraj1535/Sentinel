@@ -15,9 +15,20 @@ Run standalone for testing:  python -m app.agents.monitoring_agent
 """
 
 from datetime import datetime, timezone
-import random
+import uuid
 
 from app.db import get_connection, get_dict_cursor
+
+
+def _generate_exception_id() -> str:
+    """
+    Short, human-readable ID in the existing 'EX-XXXXX' style, but sourced
+    from uuid4 instead of random.randint — practically collision-free,
+    unlike the previous 90,000-value random range which could eventually
+    collide and abort the whole detection batch before it commits.
+    """
+    return f"EX-{uuid.uuid4().hex[:8].upper()}"
+
 
 SEVERITY_THRESHOLDS = {
     "Low": 3,
@@ -83,21 +94,35 @@ def detect_exceptions():
         score = compute_severity_score(delay_days, row["quantity"])
         severity = severity_label(score)
 
-        exception_id = f"EX-{random.randint(10000, 99999)}"
-        cur.execute("""
-            INSERT INTO exceptions (id, order_id, supplier_id, exception_type,
-                                     severity, status, detected_at)
-            VALUES (%s, %s, %s, %s, %s, 'Active', %s)
-        """, (exception_id, row["order_id"], row["supplier_id"], "Shipment Delay",
-              severity, now))
+        exception_id = _generate_exception_id()
+        try:
+            cur.execute("""
+                INSERT INTO exceptions (id, order_id, supplier_id, exception_type,
+                                         severity, status, detected_at)
+                VALUES (%s, %s, %s, %s, %s, 'Active', %s)
+            """, (exception_id, row["order_id"], row["supplier_id"], "Shipment Delay",
+                  severity, now))
 
-        cur.execute("""
-            INSERT INTO audit_log (exception_id, step, summary)
-            VALUES (%s, 'Detected', %s)
-        """, (exception_id,
-              f"Order {row['order_id']} is {delay_days:.1f} days late "
-              f"(quantity: {row['quantity']}). Severity: {severity} "
-              f"(score: {score})."))
+            cur.execute("""
+                INSERT INTO audit_log (exception_id, step, summary)
+                VALUES (%s, 'Detected', %s)
+            """, (exception_id,
+                  f"Order {row['order_id']} is {delay_days:.1f} days late "
+                  f"(quantity: {row['quantity']}). Severity: {severity} "
+                  f"(score: {score})."))
+
+            # Commit per-row (not once at the end): if a later row in this
+            # batch fails, everything already inserted so far still sticks,
+            # instead of a single failure wiping out the whole batch.
+            conn.commit()
+        except Exception as e:
+            # Extremely unlikely with uuid4-derived IDs, but don't let one bad
+            # insert abort the whole detection batch (and lose every other
+            # newly-detected exception along with it).
+            print(f"[monitoring_agent] Failed to insert exception for order "
+                  f"{row['order_id']}: {e}")
+            conn.rollback()
+            continue
 
         new_exceptions.append({
             "id": exception_id,
@@ -108,7 +133,6 @@ def detect_exceptions():
             "delay_days": round(delay_days, 1),
         })
 
-    conn.commit()
     cur.close()
     conn.close()
     return new_exceptions

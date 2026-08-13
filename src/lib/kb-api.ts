@@ -1,3 +1,6 @@
+import { roleHeaders } from "./backend-api";
+import { getDisplayName } from "./auth";
+
 export const KB_API_BASE = "http://localhost:8080";
 
 export type DocType = "Contract" | "SOP" | "Purchase Order" | "Invoice" | "Policy";
@@ -52,12 +55,20 @@ export async function fetchDocument(id: string): Promise<DocumentRecord> {
 }
 
 export async function deleteDocument(id: string): Promise<void> {
-  const res = await fetch(`${KB_API_BASE}/api/documents/${id}`, { method: "DELETE" });
+  const res = await fetch(`${KB_API_BASE}/api/documents/${id}`, {
+    method: "DELETE",
+    headers: roleHeaders(),
+  });
+  if (res.status === 403) throw new Error("You don't have permission to delete documents (Admin only).");
   if (!res.ok) throw new Error("Failed to delete");
 }
 
 export async function reindexDocument(id: string): Promise<void> {
-  const res = await fetch(`${KB_API_BASE}/api/documents/${id}/reindex`, { method: "POST" });
+  const res = await fetch(`${KB_API_BASE}/api/documents/${id}/reindex`, {
+    method: "POST",
+    headers: roleHeaders(),
+  });
+  if (res.status === 403) throw new Error("You don't have permission to reindex documents (Admin only).");
   if (!res.ok) throw new Error("Failed to reindex");
 }
 
@@ -65,17 +76,19 @@ export async function uploadDocument(input: {
   file: File;
   docType: DocType;
   supplierId?: string;
-  uploadedBy: string;
+  uploadedBy?: string;
 }): Promise<DocumentRecord> {
   const form = new FormData();
   form.append("file", input.file);
   form.append("doc_type", input.docType);
   if (input.supplierId) form.append("supplier_id", input.supplierId);
-  form.append("uploaded_by", input.uploadedBy);
+  form.append("uploaded_by", input.uploadedBy ?? getDisplayName());
   const res = await fetch(`${KB_API_BASE}/api/documents/upload`, {
     method: "POST",
+    headers: roleHeaders(),
     body: form,
   });
+  if (res.status === 403) throw new Error("You don't have permission to upload documents (Admin only).");
   if (!res.ok) throw new Error("Upload failed");
   return res.json();
 }

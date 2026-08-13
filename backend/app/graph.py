@@ -71,12 +71,22 @@ def run_full_pipeline() -> list:
     Full end-to-end run: detect all new exceptions from operational data,
     then push each one through the LangGraph pipeline.
     Returns a list of {exception_id, resolution, report} dicts.
+
+    Each newly-detected exception is processed independently — if one fails
+    (e.g. Ollama times out or returns malformed JSON on that one exception),
+    it's logged and skipped rather than aborting the rest of the batch. The
+    skipped exception stays at 'Active' and gets picked up by the next
+    process_all_active_exceptions catch-up pass, so nothing is lost.
     """
     new_exceptions = detect_exceptions()
     results = []
     for exc in new_exceptions:
-        result = run_pipeline_for_exception(exc["id"])
-        results.append(result)
+        try:
+            result = run_pipeline_for_exception(exc["id"])
+            results.append(result)
+        except Exception as e:
+            print(f"[run_full_pipeline] Skipped {exc['id']} due to error: {e}")
+            continue
     return results
 
 

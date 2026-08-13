@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { SeverityBadge } from "@/components/StatusBadges";
 import { RiskBadge } from "@/components/RiskBadge";
@@ -8,6 +8,7 @@ import { PredictiveRiskPanel } from "@/components/PredictiveRiskPanel";
 import { AddSupplierDialog } from "@/components/AddSupplierDialog";
 import { Button } from "@/components/ui/button";
 import { getSuppliers, type Supplier } from "@/lib/mock-api";
+import { hasRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/suppliers")({
@@ -33,6 +34,7 @@ function rateTone(rate: number) {
 function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [addOpen, setAddOpen] = useState(false);
+  const canAddSupplier = hasRole("Admin");
   useEffect(() => {
     getSuppliers().then(setSuppliers);
   }, []);
@@ -46,10 +48,17 @@ function SuppliersPage() {
             Performance overview and incident history across the supplier network.
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Add supplier
-        </Button>
+        {canAddSupplier ? (
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add supplier
+          </Button>
+        ) : (
+          <Button variant="outline" disabled title="Sign in as Admin to add suppliers.">
+            <Lock className="h-4 w-4" />
+            Add supplier
+          </Button>
+        )}
       </div>
 
       <AddSupplierDialog

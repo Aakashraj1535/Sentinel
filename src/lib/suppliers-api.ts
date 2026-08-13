@@ -1,4 +1,5 @@
 import type { Supplier } from "./mock-api";
+import { roleHeaders } from "./backend-api";
 
 const BASE_URL = "http://localhost:8080";
 
@@ -16,8 +17,12 @@ export async function addSupplier(input: AddSupplierInput): Promise<Supplier> {
 
   const res = await fetch(`${BASE_URL}/api/suppliers`, {
     method: "POST",
+    headers: roleHeaders(),
     body,
   });
+  if (res.status === 403) {
+    throw new Error("You don't have permission to add suppliers (Admin only).");
+  }
   if (!res.ok) {
     throw new Error(`Failed to add supplier (${res.status})`);
   }

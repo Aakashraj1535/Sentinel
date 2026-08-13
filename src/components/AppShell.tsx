@@ -1,7 +1,16 @@
-import { Link, Outlet } from "@tanstack/react-router";
-import { Activity, Bell, BookOpen, Bot, ClipboardList, LayoutDashboard, Truck, Search, CircleUser, ChevronDown } from "lucide-react";
+import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { Activity, Bell, BookOpen, Bot, ClipboardList, LayoutDashboard, Truck, Search, ChevronDown, LogOut, UserCog } from "lucide-react";
 import type { ReactNode } from "react";
 import { GlobalSearch } from "./GlobalSearch";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { getDisplayName, getRole, getInitials, logout } from "@/lib/auth";
 
 const nav = [
   {
@@ -26,6 +35,23 @@ const nav = [
 ] as const;
 
 export function AppShell({ children }: { children?: ReactNode }) {
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate({ to: "/login" });
+  }
+
+  function handleSwitchAccount() {
+    // "Switch account" = sign out of the current role and land back on
+    // /login so a different demo account can be chosen. There's no
+    // multi-account session to switch between under the hood -- this is
+    // still a single-session demo, just a clearer label/flow than
+    // silently logging out.
+    logout();
+    navigate({ to: "/login" });
+  }
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* ---------------- SIDEBAR ---------------- */}
@@ -76,18 +102,9 @@ export function AppShell({ children }: { children?: ReactNode }) {
         </nav>
 
         <div className="px-4 py-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-2.5 rounded-md px-2 py-2 hover:bg-sidebar-accent/40 transition-colors cursor-pointer">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-foreground">
-              <CircleUser className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0 leading-tight">
-              <div className="text-[12px] font-medium truncate">Demo User</div>
-              <div className="text-[10px] text-sidebar-foreground/45 flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                System online
-              </div>
-            </div>
-            <ChevronDown className="h-3.5 w-3.5 text-sidebar-foreground/40" />
+          <div className="flex items-center gap-1.5 px-2 text-[10px] text-sidebar-foreground/45">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            System online
           </div>
         </div>
       </aside>
@@ -124,9 +141,37 @@ export function AppShell({ children }: { children?: ReactNode }) {
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-danger" />
             </Link>
             <div className="ml-2 pl-3 border-l border-border flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
-                DU
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 rounded-full transition-opacity hover:opacity-80"
+                    aria-label="Account menu"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
+                      {getInitials()}
+                    </div>
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="bottom" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="text-sm font-medium">{getDisplayName()}</div>
+                    <div className="text-xs font-normal text-muted-foreground">
+                      Signed in as {getRole()}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSwitchAccount}>
+                    <UserCog className="h-4 w-4" />
+                    Switch account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-danger focus:text-danger">
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

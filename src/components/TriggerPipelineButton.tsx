@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Loader2, PlayCircle } from "lucide-react";
+import { Loader2, Lock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { runPipeline } from "@/lib/backend-api";
+import { hasRole } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export function TriggerPipelineButton({ onComplete }: { onComplete?: () => void }) {
   const [loading, setLoading] = useState(false);
+  const canRun = hasRole("Procurement Manager");
 
   async function handleClick() {
     setLoading(true);
@@ -20,10 +22,22 @@ export function TriggerPipelineButton({ onComplete }: { onComplete?: () => void 
       }
       onComplete?.();
     } catch (e) {
-      toast.error("Failed to run exception pipeline. Please try again.");
+      toast.error(e instanceof Error ? e.message : "Failed to run exception pipeline. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!canRun) {
+    return (
+      <div
+        className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm text-muted-foreground"
+        title="Sign in as a Procurement Manager or Admin to run the pipeline."
+      >
+        <Lock className="h-3.5 w-3.5" />
+        Check for New Exceptions
+      </div>
+    );
   }
 
   return (
