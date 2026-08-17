@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { Activity, Bell, BookOpen, Bot, ClipboardList, LayoutDashboard, Truck, Search, ChevronDown, LogOut, UserCog } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { GlobalSearch } from "./GlobalSearch";
 import {
   DropdownMenu,
@@ -36,6 +36,23 @@ const nav = [
 
 export function AppShell({ children }: { children?: ReactNode }) {
   const navigate = useNavigate();
+
+  // localStorage doesn't exist during server rendering, so these must
+  // stay at stable placeholder values on the FIRST client render too
+  // (the one React uses to check against the server's output) and only
+  // switch to the real values after mount -- otherwise server and
+  // client render different text (e.g. "VW" vs "AD") and React discards
+  // the whole tree to reconcile the mismatch, which can eat clicks and
+  // break navigation right after page load.
+  const [displayName, setDisplayName] = useState("Account");
+  const [role, setRole] = useState("");
+  const [initials, setInitials] = useState("··");
+
+  useEffect(() => {
+    setDisplayName(getDisplayName());
+    setRole(getRole());
+    setInitials(getInitials());
+  }, []);
 
   function handleLogout() {
     logout();
@@ -149,16 +166,16 @@ export function AppShell({ children }: { children?: ReactNode }) {
                     aria-label="Account menu"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
-                      {getInitials()}
+                      {initials}
                     </div>
                     <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" side="bottom" className="w-56">
                   <DropdownMenuLabel>
-                    <div className="text-sm font-medium">{getDisplayName()}</div>
+                    <div className="text-sm font-medium">{displayName}</div>
                     <div className="text-xs font-normal text-muted-foreground">
-                      Signed in as {getRole()}
+                      Signed in as {role}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

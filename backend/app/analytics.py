@@ -6,6 +6,78 @@ All derived from existing tables; no new tables needed.
 from datetime import datetime, timedelta, timezone
 
 
+def supplier_weekly_trend(cur, supplier_id: str, weeks: int = 12) -> dict:
+    """
+    Real historical on-time-rate trend for one supplier, computed
+    directly from actual order delivery history (expected_delivery vs
+    actual_delivery) -- NOT from suppliers.on_time_rate, which is a
+    static seeded value nothing in this codebase ever updates, so it
+    can't show movement over time even if you wanted it to.
+
+    Returns weekly on-time rate + order count (for a trend chart), plus
+    a trend_direction verdict comparing the most recent half of the
+    window against the earlier half.
+    """
+    from app.supplier_trend import compute_trend_direction
+
+    since = datetime.now(timezone.utc) - timedelta(weeks=weeks)
+    cur.execute("""
+        SELECT date_trunc('week', actual_delivery) as week,
+               actual_delivery <= expected_delivery as was_on_time
+        FROM orders
+        WHERE supplier_id = %s AND actual_delivery IS NOT NULL
+              AND actual_delivery >= %s
+        ORDER BY week
+    """, (supplier_id, since))
+    rows = cur.fetchall()
+
+    by_week = {}
+    for r in rows:
+        week_str = r["week"].date().isoformat()
+        bucket = by_week.setdefault(week_str, {"total": 0, "onTime": 0})
+        bucket["total"] += 1
+        if r["was_on_time"]:
+            bucket["onTime"] += 1
+
+    weekly_series = [
+        {
+            "week": week,
+            "onTimeRate": round((b["onTime"] / b["total"]) * 100, 1),
+            "orderCount": b["total"],
+            "onTimeCount": b["onTime"],
+        }
+        for week, b in sorted(by_week.items())
+    ]
+
+    # Split the window in half to compare "recently" vs "before that" --
+    # simpler and more transparent than a rolling regression, and easy
+    # to explain in a supplier conversation ("last 6 weeks vs the 6
+    # before that").
+    midpoint = len(weekly_series) // 2
+    prior_weeks = weekly_series[:midpoint]
+    recent_weeks = weekly_series[midpoint:]
+
+    def _aggregate(series):
+        total_orders = sum(w["orderCount"] for w in series)
+        if total_orders == 0:
+            return 0.0, 0
+        total_on_time = sum(w["onTimeCount"] for w in series)
+        return round((total_on_time / total_orders) * 100, 1), total_orders
+
+    recent_rate, recent_count = _aggregate(recent_weeks)
+    prior_rate, prior_count = _aggregate(prior_weeks)
+
+    trend_direction = compute_trend_direction(recent_rate, recent_count, prior_rate, prior_count)
+
+    return {
+        "supplierId": supplier_id,
+        "weeklySeries": weekly_series,
+        "trendDirection": trend_direction,
+        "recentOnTimeRate": recent_rate,
+        "priorOnTimeRate": prior_rate,
+    }
+
+
 def severity_distribution(cur) -> dict:
     cur.execute("SELECT severity, count(*) as c FROM exceptions GROUP BY severity")
     rows = {r["severity"]: r["c"] for r in cur.fetchall()}
@@ -47,6 +119,63 @@ def auto_resolved_rate(cur) -> dict:
     resolved = rows.get("Resolved", 0)
     rate = round((resolved / total) * 100, 1) if total else 0
     return {"autoResolvedRate": rate, "totalProcessed": total}
+
+
+def root_cause_breakdown(cur, weeks: int = 12) -> dict:
+    """
+    Structured root-cause counts for trend analysis -- the point being
+    to answer "what's our biggest recurring problem lately" without
+    anyone reading every exception's free-text root_cause by hand.
+
+    'Uncategorized' covers two real, distinct situations, both grouped
+    together deliberately since from a leadership-dashboard view they
+    mean the same thing -- "we don't have an answer here yet":
+      - exceptions not yet resolved (no root_cause text at all)
+      - exceptions resolved, but whose root_cause text didn't match any
+        known keyword pattern and hasn't been human-tagged either
+    """
+    from app.root_cause import ROOT_CAUSE_CATEGORIES
+
+    since = datetime.now(timezone.utc) - timedelta(weeks=weeks)
+
+    # Overall breakdown (all-time, not just the trend window) -- this is
+    # the "what's our biggest problem, period" answer.
+    cur.execute("SELECT root_cause_category, count(*) as c FROM exceptions GROUP BY root_cause_category")
+    overall_rows = cur.fetchall()
+    overall = {cat: 0 for cat in ROOT_CAUSE_CATEGORIES}
+    overall["Uncategorized"] = 0
+    for r in overall_rows:
+        cat = r["root_cause_category"]
+        if cat in overall:
+            overall[cat] = r["c"]
+        else:
+            overall["Uncategorized"] += r["c"]
+
+    # Weekly trend -- this is the "is it getting better or worse"
+    # answer, which a single overall count can't show.
+    cur.execute("""
+        SELECT date_trunc('week', detected_at) as week, root_cause_category, count(*) as c
+        FROM exceptions
+        WHERE detected_at >= %s
+        GROUP BY week, root_cause_category
+        ORDER BY week
+    """, (since,))
+    trend_rows = cur.fetchall()
+
+    by_week = {}
+    for r in trend_rows:
+        week_str = r["week"].date().isoformat()
+        by_week.setdefault(week_str, {"week": week_str})
+        cat = r["root_cause_category"] if r["root_cause_category"] in ROOT_CAUSE_CATEGORIES else "Uncategorized"
+        by_week[week_str][cat] = by_week[week_str].get(cat, 0) + r["c"]
+
+    trend = sorted(by_week.values(), key=lambda x: x["week"])
+
+    return {
+        "overall": overall,
+        "trend": trend,
+        "categories": ROOT_CAUSE_CATEGORIES + ["Uncategorized"],
+    }
 
 
 def calibration_metrics(cur) -> dict:

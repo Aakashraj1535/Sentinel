@@ -3,9 +3,10 @@ import { Printer } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { CompareRecommendations } from "@/components/CompareRecommendationsDialog";
-import { SeverityBadge, StatusBadge } from "@/components/StatusBadges";
+import { SeverityBadge, StatusBadge, SlaBadge } from "@/components/StatusBadges";
 import { AuditTimeline } from "@/components/AuditTimeline";
 import { HumanReviewPanel } from "@/components/HumanReviewPanel";
+import { RootCauseCategoryTag } from "@/components/RootCauseCategoryTag";
 import { PrintableIncidentReport } from "@/components/PrintableIncidentReport";
 import { getException, type ExceptionRecord } from "@/lib/mock-api";
 import type { ExceptionWithReview } from "@/lib/human-review-api";
@@ -117,6 +118,13 @@ function ExceptionDetailPage() {
             <HumanReviewPanel exception={exception} />
 
             <Panel title="Root cause" icon={FileText}>
+              <div className="mb-3">
+                <RootCauseCategoryTag
+                  exceptionId={exception.id}
+                  category={exception.rootCauseCategory}
+                  source={exception.rootCauseCategorySource}
+                />
+              </div>
               <p className="text-sm leading-relaxed text-foreground">
                 {exception.rootCause}
               </p>
@@ -150,6 +158,9 @@ function Header({ ex }: { ex: ExceptionRecord }) {
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge severity={ex.severity} />
           <StatusBadge status={ex.status} />
+          {ex.slaStatus && (
+            <SlaBadge status={ex.slaStatus} hoursRemaining={ex.slaHoursRemaining} />
+          )}
           <button
             onClick={() => window.print()}
             className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent"

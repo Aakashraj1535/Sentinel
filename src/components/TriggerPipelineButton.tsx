@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Loader2, Lock, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { runPipeline } from "@/lib/backend-api";
-import { hasRole } from "@/lib/auth";
+import { useHasRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 
 export function TriggerPipelineButton({ onComplete }: { onComplete?: () => void }) {
   const [loading, setLoading] = useState(false);
-  const canRun = hasRole("Procurement Manager");
+  const canRun = useHasRole("Procurement Manager");
 
   async function handleClick() {
     setLoading(true);

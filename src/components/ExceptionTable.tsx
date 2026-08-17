@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ExceptionRecord } from "@/lib/mock-api";
-import { SeverityBadge, StatusBadge } from "./StatusBadges";
+import { SeverityBadge, StatusBadge, SlaBadge } from "./StatusBadges";
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -24,6 +24,7 @@ export function ExceptionTable({ rows }: { rows: ExceptionRecord[] }) {
               <th className="px-4 py-3 text-left font-medium">Type</th>
               <th className="px-4 py-3 text-left font-medium">Severity</th>
               <th className="px-4 py-3 text-left font-medium">Status</th>
+              <th className="px-4 py-3 text-left font-medium">SLA</th>
               <th className="px-4 py-3 text-left font-medium">Detected</th>
             </tr>
           </thead>
@@ -57,6 +58,11 @@ export function ExceptionTable({ rows }: { rows: ExceptionRecord[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={r.status} />
+                </td>
+                <td className="px-4 py-3">
+                  {r.slaStatus && (
+                    <SlaBadge status={r.slaStatus} hoursRemaining={r.slaHoursRemaining} />
+                  )}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground tabular-nums">
                   {formatTime(r.detectedAt)}

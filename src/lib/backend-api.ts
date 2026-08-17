@@ -59,6 +59,23 @@ export async function fetchNotifications(): Promise<NotificationRecord[]> {
   return res.json();
 }
 
+export interface SendReportResponse {
+  emailSent: boolean;
+  slackSent: boolean;
+  recipient: string | null;
+  atRiskSupplierCount: number;
+}
+
+export async function sendExecutiveReportNow(): Promise<SendReportResponse> {
+  const res = await fetch(`${API_BASE}/api/reports/send-now`, {
+    method: "POST",
+    headers: roleHeaders(),
+  });
+  if (res.status === 403) throw new Error("You don't have permission to send reports (Admin only).");
+  if (!res.ok) throw new Error("Failed to send report");
+  return res.json();
+}
+
 export function relativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const s = Math.max(1, Math.round(diffMs / 1000));

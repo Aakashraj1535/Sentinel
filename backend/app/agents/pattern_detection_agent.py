@@ -12,36 +12,17 @@ suppliers have incidents with similar root-cause keywords within the
 same recent window, it's flagged as a potential systemic pattern.
 """
 
-import re
 import requests
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 from app.db import get_connection, get_dict_cursor
+from app.root_cause import classify_root_cause
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
 
 PATTERN_WINDOW_DAYS = 21
-
-# Keyword groups used to cluster incidents by likely shared cause.
-# Simple keyword matching — deliberately not ML, stays explainable.
-CAUSE_KEYWORDS = {
-    "Port / logistics congestion": ["port congestion", "highway closure", "flooding"],
-    "Customs / documentation": ["customs", "documentation"],
-    "Supplier capacity issues": ["production line", "raw material shortage", "capacity"],
-    "Quality control": ["defect", "quality", "incorrect quantity"],
-}
-
-
-def _classify_cause(root_cause_text: str) -> str:
-    if not root_cause_text:
-        return None
-    text = root_cause_text.lower()
-    for label, keywords in CAUSE_KEYWORDS.items():
-        if any(kw in text for kw in keywords):
-            return label
-    return None
 
 
 def detect_systemic_patterns() -> list:
@@ -50,7 +31,8 @@ def detect_systemic_patterns() -> list:
 
     since = datetime.now(timezone.utc) - timedelta(days=PATTERN_WINDOW_DAYS)
     cur.execute("""
-        SELECT e.id, e.supplier_id, e.root_cause, e.detected_at, s.name as supplier_name
+        SELECT e.id, e.supplier_id, e.root_cause, e.root_cause_category,
+               e.detected_at, s.name as supplier_name
         FROM exceptions e
         JOIN suppliers s ON s.id = e.supplier_id
         WHERE e.detected_at >= %s AND e.root_cause IS NOT NULL
@@ -60,7 +42,11 @@ def detect_systemic_patterns() -> list:
     # Group by classified cause; track which DISTINCT suppliers are affected
     groups = defaultdict(lambda: {"suppliers": set(), "exception_ids": [], "supplier_names": set()})
     for r in rows:
-        cause = _classify_cause(r["root_cause"])
+        # Prefer the persisted category (which respects human corrections
+        # made via the root cause tagging UI) over re-classifying from
+        # scratch every time -- falls back to live classification only
+        # for older rows that predate the root_cause_category column.
+        cause = r["root_cause_category"] or classify_root_cause(r["root_cause"])
         if cause:
             groups[cause]["suppliers"].add(r["supplier_id"])
             groups[cause]["supplier_names"].add(r["supplier_name"])

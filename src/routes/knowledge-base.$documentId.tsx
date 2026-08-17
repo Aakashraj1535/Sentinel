@@ -24,7 +24,7 @@ import {
   type ChatLanguage,
   type DocumentRecord,
 } from "@/lib/kb-api";
-import { hasRole } from "@/lib/auth";
+import { useHasRole } from "@/hooks/use-role";
 
 export const Route = createFileRoute("/knowledge-base/$documentId")({
   head: () => ({
@@ -58,7 +58,7 @@ function DocumentDetailPage() {
   const [doc, setDoc] = useState<DocumentRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [reindexing, setReindexing] = useState(false);
-  const canManageDocs = hasRole("Admin");
+  const canManageDocs = useHasRole("Admin");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);

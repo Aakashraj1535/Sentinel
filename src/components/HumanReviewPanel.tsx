@@ -8,7 +8,7 @@ import {
   type ExceptionWithReview,
   type HumanDecision,
 } from "@/lib/human-review-api";
-import { hasRole } from "@/lib/auth";
+import { useHasRole } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 
 function fmt(iso: string) {
@@ -24,7 +24,7 @@ export function HumanReviewPanel({ exception }: { exception: ExceptionWithReview
   const [addingNote, setAddingNote] = useState(false);
   const [decisionNote, setDecisionNote] = useState("");
   const [submitting, setSubmitting] = useState<HumanDecision | null>(null);
-  const canReview = hasRole("Procurement Manager");
+  const canReview = useHasRole("Procurement Manager");
 
   const alreadyDecided = !!exception.humanDecision;
 

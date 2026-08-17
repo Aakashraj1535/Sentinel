@@ -17,7 +17,9 @@ import { Route as KnowledgeBaseRouteImport } from './routes/knowledge-base'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as ActivityLogRouteImport } from './routes/activity-log'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuppliersIndexRouteImport } from './routes/suppliers.index'
 import { Route as KnowledgeBaseIndexRouteImport } from './routes/knowledge-base.index'
+import { Route as SuppliersSupplierIdRouteImport } from './routes/suppliers.$supplierId'
 import { Route as KnowledgeBaseDocumentIdRouteImport } from './routes/knowledge-base.$documentId'
 import { Route as ExceptionsExceptionIdRouteImport } from './routes/exceptions.$exceptionId'
 
@@ -61,10 +63,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuppliersIndexRoute = SuppliersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuppliersRoute,
+} as any)
 const KnowledgeBaseIndexRoute = KnowledgeBaseIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => KnowledgeBaseRoute,
+} as any)
+const SuppliersSupplierIdRoute = SuppliersSupplierIdRouteImport.update({
+  id: '/$supplierId',
+  path: '/$supplierId',
+  getParentRoute: () => SuppliersRoute,
 } as any)
 const KnowledgeBaseDocumentIdRoute = KnowledgeBaseDocumentIdRouteImport.update({
   id: '/$documentId',
@@ -85,10 +97,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/suppliers': typeof SuppliersRoute
+  '/suppliers': typeof SuppliersRouteWithChildren
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/suppliers/$supplierId': typeof SuppliersSupplierIdRoute
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
+  '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,10 +111,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/suppliers': typeof SuppliersRoute
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/suppliers/$supplierId': typeof SuppliersSupplierIdRoute
   '/knowledge-base': typeof KnowledgeBaseIndexRoute
+  '/suppliers': typeof SuppliersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,10 +126,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/suppliers': typeof SuppliersRoute
+  '/suppliers': typeof SuppliersRouteWithChildren
   '/exceptions/$exceptionId': typeof ExceptionsExceptionIdRoute
   '/knowledge-base/$documentId': typeof KnowledgeBaseDocumentIdRoute
+  '/suppliers/$supplierId': typeof SuppliersSupplierIdRoute
   '/knowledge-base/': typeof KnowledgeBaseIndexRoute
+  '/suppliers/': typeof SuppliersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,7 +146,9 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/suppliers/$supplierId'
     | '/knowledge-base/'
+    | '/suppliers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,10 +157,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/notifications'
     | '/sitemap.xml'
-    | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/suppliers/$supplierId'
     | '/knowledge-base'
+    | '/suppliers'
   id:
     | '__root__'
     | '/'
@@ -154,7 +174,9 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/exceptions/$exceptionId'
     | '/knowledge-base/$documentId'
+    | '/suppliers/$supplierId'
     | '/knowledge-base/'
+    | '/suppliers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,7 +187,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  SuppliersRoute: typeof SuppliersRoute
+  SuppliersRoute: typeof SuppliersRouteWithChildren
   ExceptionsExceptionIdRoute: typeof ExceptionsExceptionIdRoute
 }
 
@@ -227,12 +249,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suppliers/': {
+      id: '/suppliers/'
+      path: '/'
+      fullPath: '/suppliers/'
+      preLoaderRoute: typeof SuppliersIndexRouteImport
+      parentRoute: typeof SuppliersRoute
+    }
     '/knowledge-base/': {
       id: '/knowledge-base/'
       path: '/'
       fullPath: '/knowledge-base/'
       preLoaderRoute: typeof KnowledgeBaseIndexRouteImport
       parentRoute: typeof KnowledgeBaseRoute
+    }
+    '/suppliers/$supplierId': {
+      id: '/suppliers/$supplierId'
+      path: '/$supplierId'
+      fullPath: '/suppliers/$supplierId'
+      preLoaderRoute: typeof SuppliersSupplierIdRouteImport
+      parentRoute: typeof SuppliersRoute
     }
     '/knowledge-base/$documentId': {
       id: '/knowledge-base/$documentId'
@@ -265,6 +301,20 @@ const KnowledgeBaseRouteWithChildren = KnowledgeBaseRoute._addFileChildren(
   KnowledgeBaseRouteChildren,
 )
 
+interface SuppliersRouteChildren {
+  SuppliersSupplierIdRoute: typeof SuppliersSupplierIdRoute
+  SuppliersIndexRoute: typeof SuppliersIndexRoute
+}
+
+const SuppliersRouteChildren: SuppliersRouteChildren = {
+  SuppliersSupplierIdRoute: SuppliersSupplierIdRoute,
+  SuppliersIndexRoute: SuppliersIndexRoute,
+}
+
+const SuppliersRouteWithChildren = SuppliersRoute._addFileChildren(
+  SuppliersRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityLogRoute: ActivityLogRoute,
@@ -273,7 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  SuppliersRoute: SuppliersRoute,
+  SuppliersRoute: SuppliersRouteWithChildren,
   ExceptionsExceptionIdRoute: ExceptionsExceptionIdRoute,
 }
 export const routeTree = rootRouteImport

@@ -18,6 +18,7 @@ import requests
 
 from app.db import get_connection, get_dict_cursor
 from app.agents.rag_agent import retrieve_context
+from app.root_cause import classify_root_cause, ROOT_CAUSE_CATEGORIES
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
@@ -53,9 +54,26 @@ the likely customer impact (Minimal/Moderate/Significant), a confidence score
 from 0-100 (how sure you are this is the right action given the context), and
 a one-sentence root cause summary shared across all options.
 
+The root cause summary MUST be concrete and specific about WHY the delay
+happened, based on the retrieved context. Do NOT use vague, non-specific
+language like "unforeseen circumstances", "unexpected issues", or "factors
+beyond control" -- if the context doesn't clearly say why, say plainly that
+the cause is unclear from available documentation, rather than papering over
+the gap with a vague phrase. A vague root cause is useless for spotting
+recurring supplier problems, which is the whole point of recording it.
+
+Also classify the root cause into EXACTLY ONE of these fixed categories
+(pick the closest match even if imperfect -- use "Other" only if truly none apply):
+- "Port / logistics congestion"
+- "Customs / documentation"
+- "Supplier capacity issues"
+- "Quality control"
+- "Other"
+
 Respond with ONLY valid JSON in exactly this shape, no other text:
 {{
-  "root_cause": "one sentence summary",
+  "root_cause": "one specific, concrete sentence -- not a vague generality",
+  "root_cause_category": "one of the fixed categories above, exactly as written",
   "options": [
     {{"action": "...", "estimated_cost": "Low|Medium|High", "estimated_delivery": "...",
       "customer_impact": "Minimal|Moderate|Significant", "confidence_pct": 0}}
@@ -115,6 +133,7 @@ def confidence_label(pct: float) -> str:
 import os
 import smtplib
 from email.mime.text import MIMEText
+from app.notifications import format_escalation_message, send_slack_notification
 
 ESCALATION_ROLE_ROUTING = {
     "High": "procurement.manager@company.com",
@@ -180,6 +199,14 @@ def notify_human_reviewer(exception_id: str, severity: str, escalation_reason: s
             f"  (SCS_SMTP_EMAIL / SCS_SMTP_APP_PASSWORD not set, or send failed "
             f"-- falling back to simulated notification.)"
         )
+
+    # Slack is an ADDITIONAL channel, not a replacement -- fires
+    # independently of whether email succeeded. No-ops safely if
+    # SCS_SLACK_WEBHOOK_URL isn't set (see app/notifications.py).
+    slack_text = format_escalation_message(exception_id, severity, escalation_reason)
+    if send_slack_notification(slack_text):
+        print(f"[slack] Sent escalation notification for {exception_id}.")
+
     return real_recipient
 # -----------------------------------------------------------------------
 
@@ -259,6 +286,7 @@ def resolve_exception(exception_id: str, context_docs: list = None):
 
     options = result.get("options", [])[:3]
     root_cause = result.get("root_cause", "Not determined.")
+    llm_category = result.get("root_cause_category")
 
     # Compute grounding score from THIS exception's actual retrieved context
     # (not from the LLM), then blend it into each option's confidence.
@@ -298,11 +326,32 @@ def resolve_exception(exception_id: str, context_docs: list = None):
               opt.get("raw_llm_confidence_pct"), opt.get("grounding_score")))
 
     new_status = "Escalated" if escalate else "Resolved"
+    # Prefer the category the LLM chose directly (from the fixed list in
+    # the prompt) -- far more reliable than reverse-engineering a
+    # category from free text via keyword matching, since the model
+    # already reasoned about the cause and free-text phrasing varies
+    # endlessly ("stuck in customs" vs "held for paperwork" vs "import
+    # processing delay" all mean the same thing but none share keywords).
+    # Keyword matching is kept only as a fallback for whatever the LLM
+    # returns outside the fixed list (or omits, or an older prompt
+    # version). Only set on first resolution; a human-corrected category
+    # (via the tagging endpoint) is never silently overwritten by
+    # re-running the pipeline on the same exception, since that endpoint
+    # is the only other writer of this column and always sets
+    # root_cause_category_source='human'.
+    if llm_category in ROOT_CAUSE_CATEGORIES:
+        auto_category = llm_category
+    else:
+        auto_category = classify_root_cause(root_cause)
     cur.execute("""
         UPDATE exceptions
-        SET root_cause = %s, auto_resolved = %s, escalation_reason = %s, status = %s
+        SET root_cause = %s, auto_resolved = %s, escalation_reason = %s, status = %s,
+            root_cause_category = COALESCE(root_cause_category, %s),
+            root_cause_category_source = COALESCE(root_cause_category_source,
+                CASE WHEN %s IS NOT NULL THEN 'auto' ELSE NULL END)
         WHERE id = %s
-    """, (root_cause, not escalate, escalation_reason, new_status, exception_id))
+    """, (root_cause, not escalate, escalation_reason, new_status,
+          auto_category, auto_category, exception_id))
 
     notified_to = None
     if escalate:

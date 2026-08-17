@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, Gauge, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Gauge, ShieldAlert } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ExceptionTable } from "@/components/ExceptionTable";
 import { SummaryStat } from "@/components/SummaryStat";
 import { TriggerPipelineButton } from "@/components/TriggerPipelineButton";
+import { SendReportButton } from "@/components/SendReportButton";
 import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
 import { SystemHealthStrip } from "@/components/SystemHealthStrip";
 import { SystemicPatternsPanel } from "@/components/SystemicPatternsPanel";
+import { RootCauseAnalysisPanel } from "@/components/RootCauseAnalysisPanel";
 import { CalibrationCard } from "@/components/CalibrationCard";
 import {
   getDashboardSummary,
@@ -51,6 +53,7 @@ function DashboardPage() {
             Monitoring live
           </div>
           <TriggerPipelineButton onComplete={refresh} />
+          <SendReportButton />
         </div>
       </div>
 
@@ -60,7 +63,7 @@ function DashboardPage() {
 
 
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-8">
         <SummaryStat
           label="Active exceptions"
           value={summary?.activeCount ?? "—"}
@@ -74,6 +77,20 @@ function DashboardPage() {
           hint="Auto & manual"
           tone="success"
           icon={<CheckCircle2 className="h-4 w-4" />}
+        />
+        <SummaryStat
+          label="SLA breached"
+          value={summary?.slaBreachedCount ?? "—"}
+          hint="Past response deadline"
+          tone="danger"
+          icon={<AlertTriangle className="h-4 w-4" />}
+        />
+        <SummaryStat
+          label="SLA at risk"
+          value={summary?.slaAtRiskCount ?? "—"}
+          hint="Approaching deadline"
+          tone="warning"
+          icon={<Clock className="h-4 w-4" />}
         />
         <SummaryStat
           label="Avg. confidence"
@@ -95,6 +112,10 @@ function DashboardPage() {
           Analytics
         </h2>
         <AnalyticsCharts key={reloadKey} />
+      </div>
+
+      <div className="mb-8">
+        <RootCauseAnalysisPanel />
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">

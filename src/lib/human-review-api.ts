@@ -49,3 +49,18 @@ export async function submitExceptionDecision(
   if (!res.ok) throw new Error("Failed to submit decision");
   return res.json();
 }
+
+export async function setRootCauseCategory(
+  id: string,
+  category: string,
+): Promise<{ exceptionId: string; rootCauseCategory: string }> {
+  const body = new URLSearchParams({ category });
+  const res = await fetch(`${API_BASE}/api/exceptions/${id}/root-cause-category`, {
+    method: "POST",
+    headers: roleHeaders({ "Content-Type": "application/x-www-form-urlencoded" }),
+    body,
+  });
+  if (res.status === 403) throw new Error("You don't have permission to tag root causes.");
+  if (!res.ok) throw new Error("Failed to set root cause category");
+  return res.json();
+}

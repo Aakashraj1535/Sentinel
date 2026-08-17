@@ -5,6 +5,7 @@ data to real API calls requires zero changes on the frontend side.
 """
 
 from app.db import get_dict_cursor
+from app.sla import compute_sla_status, compute_sla_deadline, hours_remaining
 
 
 def _iso(dt):
@@ -59,6 +60,10 @@ def serialize_exception(cur, exception_id: str) -> dict:
         "summary": a["summary"],
     } for a in cur.fetchall()]
 
+    sla_status = compute_sla_status(exc["detected_at"], exc["severity"], exc["status"])
+    sla_deadline = compute_sla_deadline(exc["detected_at"], exc["severity"])
+    sla_hours_remaining = hours_remaining(exc["detected_at"], exc["severity"])
+
     return {
         "id": exc["id"],
         "supplier": exc["supplier_name"],
@@ -68,12 +73,17 @@ def serialize_exception(cur, exception_id: str) -> dict:
         "status": exc["status"],
         "detectedAt": _iso(exc["detected_at"]),
         "rootCause": exc["root_cause"] or "",
+        "rootCauseCategory": exc.get("root_cause_category"),
+        "rootCauseCategorySource": exc.get("root_cause_category_source"),
         "autoResolved": exc["auto_resolved"],
         "escalationReason": exc["escalation_reason"],
         "humanDecision": exc.get("human_decision"),
         "humanDecisionNote": exc.get("human_decision_note"),
         "humanDecidedAt": _iso(exc.get("human_decided_at")),
         "humanDecidedBy": exc.get("human_decided_by"),
+        "slaStatus": sla_status,
+        "slaDeadline": _iso(sla_deadline),
+        "slaHoursRemaining": sla_hours_remaining,
         "knowledge": knowledge,
         "recommendations": recommendations,
         "audit": audit,
@@ -130,11 +140,17 @@ def list_suppliers(cur) -> list:
 
 
 def dashboard_summary(cur) -> dict:
-    cur.execute("SELECT status FROM exceptions")
+    cur.execute("SELECT status, severity, detected_at FROM exceptions")
     rows = cur.fetchall()
     active_count = sum(1 for r in rows if r["status"] == "Active")
     resolved_count = sum(1 for r in rows if r["status"] == "Resolved")
     escalated_count = sum(1 for r in rows if r["status"] == "Escalated")
+
+    sla_statuses = [
+        compute_sla_status(r["detected_at"], r["severity"], r["status"]) for r in rows
+    ]
+    sla_breached_count = sum(1 for s in sla_statuses if s == "Breached")
+    sla_at_risk_count = sum(1 for s in sla_statuses if s == "At Risk")
 
     cur.execute("SELECT confidence_pct FROM recommendations WHERE confidence_pct IS NOT NULL")
     confidences = [float(r["confidence_pct"]) for r in cur.fetchall()]
@@ -143,6 +159,8 @@ def dashboard_summary(cur) -> dict:
     return {
         "activeCount": active_count,
         "resolvedToday": resolved_count,
+        "slaBreachedCount": sla_breached_count,
+        "slaAtRiskCount": sla_at_risk_count,
         "avgConfidence": avg_confidence,
         "escalationsPending": escalated_count,
     }

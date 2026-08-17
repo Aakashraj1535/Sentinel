@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { hasRole } from "@/lib/auth";
+import { useHasRole } from "@/hooks/use-role";
 import {
   DOC_TYPES,
   KB_API_BASE,
@@ -72,7 +72,7 @@ function KnowledgeBasePage() {
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<DocumentRecord | null>(null);
-  const canManageDocs = hasRole("Admin");
+  const canManageDocs = useHasRole("Admin");
   const pollTimers = useRef<Map<string, number>>(new Map());
 
   const loadSummary = useCallback(() => {

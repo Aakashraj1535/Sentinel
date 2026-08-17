@@ -13,8 +13,10 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTa
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 import csv
 import io
+import os
 
 from app.db import get_connection, get_dict_cursor
 from app.serializers import (
@@ -26,6 +28,8 @@ from app import document_service
 from app import analytics as analytics_module
 from app.agents import predictive_risk_agent
 from app.agents import pattern_detection_agent
+from app.agents import sla_monitor
+from app.agents import report_scheduler
 from app.auth import require_role
 
 app = FastAPI(title="Supply Chain Sentinel API")
@@ -64,7 +68,17 @@ scheduler = BackgroundScheduler()
 
 def _auto_process_job():
     try:
-        # Pick up any brand-new exceptions from operational data first.
+        # SLA checking runs FIRST and is deliberately independent of
+        # everything below it -- it's pure DB queries + a webhook/SMTP
+        # call, no LLM involved. If it ran last (as it originally did),
+        # a slow or unresponsive Ollama call in the steps below could
+        # delay time-critical breach notifications by the same amount,
+        # which defeats the point of having an SLA monitor at all.
+        sla_monitor.check_sla_breaches()
+    except Exception as e:
+        print(f"[scheduler] check_sla_breaches error: {e}")
+    try:
+        # Pick up any brand-new exceptions from operational data.
         run_full_pipeline()
     except Exception as e:
         print(f"[scheduler] run_full_pipeline error: {e}")
@@ -87,6 +101,24 @@ def start_scheduler():
     scheduler.start()
     print(f"[scheduler] Auto-processing started: every {SCHEDULER_INTERVAL_MINUTES} min, "
           f"batch size {SCHEDULER_BATCH_LIMIT}.")
+
+    # Executive digest: weekly by default (Monday 8am), configurable via
+    # SCS_REPORT_CRON as a standard 5-field crontab string, e.g.
+    # "0 8 * * MON" or "0 8 * * *" for daily. Kept as a separate job from
+    # _auto_process_job since it runs far less often and has nothing to
+    # do with exception processing.
+    report_cron = os.environ.get("SCS_REPORT_CRON", "0 8 * * MON")
+    try:
+        scheduler.add_job(
+            report_scheduler.generate_and_send_report,
+            CronTrigger.from_crontab(report_cron),
+            id="executive_report",
+            replace_existing=True,
+        )
+        print(f"[scheduler] Executive digest scheduled: '{report_cron}' (cron syntax).")
+    except Exception as e:
+        print(f"[scheduler] Failed to schedule executive digest (check SCS_REPORT_CRON "
+              f"format): {e}")
 
 
 @app.on_event("shutdown")
@@ -347,6 +379,19 @@ def trigger_pipeline(_role: str = Depends(require_role("Procurement Manager"))):
         "processed": len(results),
         "exception_ids": [r["report"]["exception_id"] for r in results],
     }
+
+
+@app.post("/api/reports/send-now")
+def trigger_executive_report(_role: str = Depends(require_role("Admin"))):
+    """
+    Manually sends the executive digest immediately, on whatever channels
+    are configured (email via SCS_REPORT_RECIPIENT/SCS_NOTIFY_TO, Slack
+    via SCS_SLACK_WEBHOOK_URL). Exists so nobody has to wait for the
+    weekly schedule to see what the report looks like -- Admin-gated
+    since it's an outbound communication action, same tier as document
+    management.
+    """
+    return report_scheduler.generate_and_send_report()
 
 
 @app.post("/api/process-active-exceptions")
@@ -649,3 +694,83 @@ def get_calibration_metrics():
     cur.close()
     conn.close()
     return result
+
+
+@app.get("/api/analytics/root-causes")
+def get_root_cause_breakdown():
+    """
+    Structured root-cause counts (overall + weekly trend) for the Root
+    Cause Analysis panel. Open to any signed-in role (Viewer included) —
+    same tier as the other analytics endpoints, which are read-only by
+    nature.
+    """
+    conn = get_connection()
+    cur = get_dict_cursor(conn)
+    result = analytics_module.root_cause_breakdown(cur)
+    cur.close()
+    conn.close()
+    return result
+
+
+@app.get("/api/suppliers/{supplier_id}/trend")
+def get_supplier_trend(supplier_id: str):
+    """
+    Real historical on-time-rate trend for one supplier, computed from
+    actual order delivery data -- see analytics.supplier_weekly_trend
+    for why this exists instead of relying on the static
+    suppliers.on_time_rate column.
+    """
+    conn = get_connection()
+    cur = get_dict_cursor(conn)
+    cur.execute("SELECT id FROM suppliers WHERE id = %s", (supplier_id,))
+    if not cur.fetchone():
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    result = analytics_module.supplier_weekly_trend(cur, supplier_id)
+    cur.close()
+    conn.close()
+    return result
+
+
+@app.post("/api/exceptions/{exception_id}/root-cause-category")
+def set_root_cause_category(
+    exception_id: str,
+    category: str = Form(...),
+    _role: str = Depends(require_role("Procurement Manager")),
+):
+    """
+    Lets a human correct or fill in the auto-classified root cause
+    category — the actual "tagging" half of this feature, since keyword
+    matching (see app/root_cause.py) deliberately won't catch everything
+    and shouldn't be treated as the final word.
+    """
+    from app.root_cause import ROOT_CAUSE_CATEGORIES
+
+    if category not in ROOT_CAUSE_CATEGORIES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"category must be one of {ROOT_CAUSE_CATEGORIES}",
+        )
+
+    conn = get_connection()
+    cur = get_dict_cursor(conn)
+    cur.execute("SELECT id FROM exceptions WHERE id = %s", (exception_id,))
+    if not cur.fetchone():
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Exception not found")
+
+    cur.execute("""
+        UPDATE exceptions
+        SET root_cause_category = %s, root_cause_category_source = 'human'
+        WHERE id = %s
+    """, (category, exception_id))
+    cur.execute("""
+        INSERT INTO audit_log (exception_id, step, summary)
+        VALUES (%s, 'Root Cause Tagged', %s)
+    """, (exception_id, f"Root cause category set to '{category}' by a human reviewer."))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"exceptionId": exception_id, "rootCauseCategory": category}

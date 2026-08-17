@@ -39,6 +39,8 @@ export interface AuditStep {
   summary: string;
 }
 
+export type SlaStatus = "On Track" | "At Risk" | "Breached" | "Complete";
+
 export interface ExceptionRecord {
   id: string;
   supplier: string;
@@ -48,8 +50,13 @@ export interface ExceptionRecord {
   status: ExceptionStatus;
   detectedAt: string;
   rootCause: string;
+  rootCauseCategory?: string | null;
+  rootCauseCategorySource?: "auto" | "human" | null;
   autoResolved: boolean;
   escalationReason?: string;
+  slaStatus?: SlaStatus;
+  slaDeadline?: string;
+  slaHoursRemaining?: number;
   knowledge: KnowledgeSource[];
   recommendations: Recommendation[];
   audit: AuditStep[];
@@ -94,7 +101,16 @@ export async function getSuppliers(): Promise<Supplier[]> {
   return res.json();
 }
 
-export async function getDashboardSummary() {
+export interface DashboardSummary {
+  activeCount: number;
+  resolvedToday: number;
+  slaBreachedCount: number;
+  slaAtRiskCount: number;
+  avgConfidence: number;
+  escalationsPending: number;
+}
+
+export async function getDashboardSummary(): Promise<DashboardSummary> {
   const res = await fetch(`${API_BASE}/dashboard-summary`);
   if (!res.ok) throw new Error(`Failed to fetch dashboard summary: ${res.status}`);
   return res.json();
