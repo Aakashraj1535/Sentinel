@@ -1,0 +1,41 @@
+{
+  "totalDecided": 9,
+  "approved": 8,
+  "rejected": 1,
+  "overallApprovalRatePct": 88.9,
+  "bySeverity": {
+    "High": {
+      "total": 8,
+      "approved": 7,
+      "approval_rate_pct": 87.5
+    },
+    "Medium": {
+      "total": 1,
+      "approved": 1,
+      "approval_rate_pct": 100.0
+    }
+  },
+  "byRootCauseCategory": {
+    "Uncategorized": {
+      "total": 4,
+      "approved": 3,
+      "approval_rate_pct": 75.0
+    },
+    "Quality control": {
+      "total": 1,
+      "approved": 1,
+      "approval_rate_pct": 100.0
+    },
+    "Port / logistics congestion": {
+      "total": 3,
+      "approved": 3,
+      "approval_rate_pct": 100.0
+    },
+    "Supplier capacity issues": {
+      "total": 1,
+      "approved": 1,
+      "approval_rate_pct": 100.0
+    }
+  },
+  "caveat": "A low approval rate could mean the system over-escalates (flags cases that didn't need human review) OR that its recommended resolution option is unreliable once a human actually checks it -- this metric alone can't separate the two causes; reading a sample of Rejected exceptions' human_decision_note is needed to tell which."
+}

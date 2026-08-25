@@ -1,0 +1,49 @@
+{
+  "metrics": {
+    "naive_baseline": {
+      "n": 285,
+      "mae": 997.67,
+      "rmse": 2390.52,
+      "mape": 124.83,
+      "pearson_r": 0.8972
+    },
+    "rule_based": {
+      "n": 285,
+      "mae": 548.32,
+      "rmse": 1194.94,
+      "mape": 30.05,
+      "pearson_r": 0.959
+    },
+    "llm_only": {
+      "n": 285,
+      "mae": 1743.97,
+      "rmse": 4649.64,
+      "mape": 172.79,
+      "pearson_r": 0.7034
+    },
+    "hybrid_llm_correction": {
+      "n": 285,
+      "mae": 581.03,
+      "rmse": 1467.43,
+      "mape": 32.05,
+      "pearson_r": 0.9492
+    }
+  },
+  "significance": {
+    "rule_based_vs_naive_baseline": {
+      "z": -8.252,
+      "p_value": 0.0,
+      "significant_at_0.05": true
+    },
+    "rule_based_vs_llm_only": {
+      "z": -9.7083,
+      "p_value": 0.0,
+      "significant_at_0.05": true
+    },
+    "rule_based_vs_hybrid_llm_correction": {
+      "z": -1.1553,
+      "p_value": 0.24797,
+      "significant_at_0.05": false
+    }
+  }
+}

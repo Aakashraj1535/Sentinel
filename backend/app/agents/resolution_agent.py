@@ -18,7 +18,7 @@ import requests
 
 from app.db import get_connection, get_dict_cursor
 from app.agents.rag_agent import retrieve_context
-from app.root_cause import classify_root_cause, ROOT_CAUSE_CATEGORIES
+from app.root_cause import classify_root_cause, ROOT_CAUSE_CATEGORIES, CATEGORY_GUIDANCE
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
@@ -62,17 +62,18 @@ the cause is unclear from available documentation, rather than papering over
 the gap with a vague phrase. A vague root cause is useless for spotting
 recurring supplier problems, which is the whole point of recording it.
 
-Also classify the root cause into EXACTLY ONE of these fixed categories
-(pick the closest match even if imperfect -- use "Other" only if truly none apply):
-- "Port / logistics congestion"
-- "Customs / documentation"
-- "Supplier capacity issues"
-- "Quality control"
-- "Other"
+Also classify the root cause into EXACTLY ONE of these fixed categories.
+{CATEGORY_GUIDANCE}
+
+Before choosing, briefly reason about which category fits (1 short
+sentence) -- specifically check whether any reliability claim you're
+about to rely on is actually negative, not just present. Then pick the
+closest match even if imperfect.
 
 Respond with ONLY valid JSON in exactly this shape, no other text:
 {{
   "root_cause": "one specific, concrete sentence -- not a vague generality",
+  "category_reasoning": "1 short sentence on why this category fits, per the worked examples above",
   "root_cause_category": "one of the fixed categories above, exactly as written",
   "options": [
     {{"action": "...", "estimated_cost": "Low|Medium|High", "estimated_delivery": "...",

@@ -110,9 +110,9 @@ function DashboardPage() {
           label="Financial impact at risk"
           value={
             summary
-              ? summary.totalFinancialImpactAtRisk.toLocaleString("en-IN", {
+              ? summary.totalFinancialImpactAtRisk.toLocaleString(undefined, {
                   style: "currency",
-                  currency: "INR",
+                  currency: "USD",
                   maximumFractionDigits: 0,
                 })
               : "—"

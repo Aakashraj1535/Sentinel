@@ -5,7 +5,7 @@
   GitHub username/repository name to make this badge live, e.g.
   https://github.com/aakashraj/Sentinel/actions/workflows/tests.yml
 -->
-![Tests](https://github.com/Aakashraj1535/Sentinel/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)
 
 An autonomous, multi-agent, RAG-driven supply chain exception detection and resolution system. Built as a final-year Information Technology project at Easwari Engineering College.
 

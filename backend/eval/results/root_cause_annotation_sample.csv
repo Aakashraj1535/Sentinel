@@ -1,0 +1,41 @@
+exception_id,exception_type,root_cause_text,system_category,human_label
+EX-TESTFFD5BA,Shipment Delay,"Shipment delay due to supplier not meeting agreed delivery window, with no alternate stock available and no prior port congestion incidents at the origin port of SUP-001.",Port / logistics congestion,Supplier capacity issues
+EXC-3D898A77,delayed_shipment,"The supplier is experiencing port congestion at the origin port, leading to shipment delays.",Port / logistics congestion,Port / logistics congestion
+EX-38757,Shipment Delay,"Regional highway closure due to flooding is the root cause of the shipment delay, and it is not an exempt force majeure event under the supplier contract.",Port / logistics congestion,Port / logistics congestion
+EXC-C7461E8D,defective_shipment,Defective shipment due to supplier quality issues or inadequate supplier oversight.,Quality control,Quality control
+EXC-054B0F7B,defective_shipment,"Inconsistent shipping quantity, a quality issue that has occurred with multiple suppliers and requires immediate attention to prevent stockouts.",Quality control,Quality control
+EX-30465,Shipment Delay,Regional highway closure due to flooding is the root cause of this shipment delay.,Port / logistics congestion,Port / logistics congestion
+EX-34741,Shipment Delay,Port congestion at origin port is causing repeated shipment delays.,Port / logistics congestion,Port / logistics congestion
+EXC-002E7389,defective_shipment,"Supplier on-time rate has been consistently below target, indicating a systemic issue with Delta Logistics' supply chain reliability.",Port / logistics congestion,Supplier capacity issues
+EXC-CF1DE5BF,compliance_violation,"Delta Logistics supplier on-time rate is too low and has a history of quality issues, indicating potential reliability concerns.",Port / logistics congestion,Supplier capacity issues
+EXC-3B989E10,delayed_shipment,"Supplier Alpha_Inc has exceeded 3 days of delayed shipment with a supplier on-time rate of 90.60%, having experienced 32 total past incidents, indicating recurring issues with shipping delays.",Port / logistics congestion,Supplier capacity issues
+EXC-79B13245,defective_shipment,"Delta Logistics supplier has a history of shipping defects and stockouts, primarily due to raw material shortages or vehicle breakdowns during transit.",Port / logistics congestion,Supplier capacity issues
+EX-19365,Shipment Delay,Vehicle breakdown during transit or port congestion at origin port may have caused the shipment delay.,Port / logistics congestion,Port / logistics congestion
+EX-82656,Shipment Delay,"Shipment delay due to unforeseen circumstances, with documentation required for further investigation.",Customs / documentation,Customs / documentation
+EX-71773,Shipment Delay,Port congestion at origin port may have caused the shipment delay due to unforeseen circumstances.,Port / logistics congestion,Port / logistics congestion
+EX-88258,Shipment Delay,Port congestion at origin port is a recurring cause of shipment delays for SUP-002.,Port / logistics congestion,Port / logistics congestion
+EXC-6FEE72AD,defective_shipment,Supplier performance and reliability issues warrant immediate attention to prevent future defective shipments.,Quality control,Supplier capacity issues
+EX-27502,Shipment Delay,Port congestion at origin port is the root cause of shipment delays at SUP-004.,Port / logistics congestion,Port / logistics congestion
+EXC-EE5BBE76,compliance_violation,"The supplier's on-time rate is below the desired threshold, and there are multiple quality issues and stockouts reported by the supplier.",Quality control,Quality control
+EXC-68335FD7,defective_shipment,"Supplier Beta_Supplies has a history of quality issues and stockouts, likely due to inconsistent supply chain management.",Quality control,Quality control
+EXC-EF3E342B,defective_shipment,"Supplier shipment quality control process is inconsistent, leading to repeated instances of incorrect quantities being shipped.",Quality control,Quality control
+EXC-B3A77136,compliance_violation,"Supplier Delta_Logistics has a high number of quality issues and stockouts, which may be related to their supplier total past incidents.",Port / logistics congestion,Supplier capacity issues
+EX-24066,Shipment Delay,"Shipment delay caused by Meridian Logistics Co. exceeding the agreed delivery window of 10 business days, resulting in a quality issue due to incorrect quantity shipped.",Port / logistics congestion,Supplier capacity issues
+EXC-20227FE1,defective_shipment,"Supplier Beta_Supplies has a history of shipping incorrect quantities, resulting in quality issues and stockouts due to raw material shortages at their factory.",Supplier capacity issues,Supplier capacity issues
+EXC-A18B8E25,compliance_violation,"Supplier on-time rate has dropped to 88.60% with 44 past incidents, indicating potential quality or logistical issues with Beta_Supplies",Quality control,Supplier capacity issues
+EX-37522,Shipment Delay,"Shipment delay caused by Meridian Logistics Co. exceeding the agreed delivery window of 10 business days, resulting in a high severity delay with no past incidents and on-time rate of 100.00%.",Port / logistics congestion,Port / logistics congestion
+EX-55271,Shipment Delay,Port congestion at origin port is the root cause of shipment delays for SUP-002.,Port / logistics congestion,Port / logistics congestion
+EXC-74E4C0EB,delayed_shipment,"The supplier Delta_Logistics has experienced a delayed shipment, likely due to operational issues within their logistics network.",Port / logistics congestion,Supplier capacity issues
+EX-89014,Shipment Delay,"Regional highway closure due to flooding forced Pinecrest Manufacturing to transfer stock from an alternate warehouse, indicating a need for proactive management of potential supply chain disruptions.",Port / logistics congestion,Port / logistics congestion
+EXC-54934FAC,defective_shipment,The root cause of the defective shipment is likely due to a lack of quality control or accurate inventory management at the supplier's end.,Quality control,Quality control
+EX-33917,Shipment Delay,Port congestion at origin port led to the shipment delay.,Port / logistics congestion,Port / logistics congestion
+EX-25581,Shipment Delay,"Meridian Logistics Co. has a history of reliable on-time delivery but experienced a high-severity shipment delay, prompting the need for swift resolution.",Port / logistics congestion,Other
+EXC-7A8C6688,defective_shipment,"Repeatedly, suppliers have either shipped incorrect quantities or faced raw material shortages leading to stockouts.",Supplier capacity issues,Supplier capacity issues
+EXC-7767192C,defective_shipment,Supplier reliability is compromised due to a history of quality and stockout issues with Delta Logistics.,Port / logistics congestion,Supplier capacity issues
+EXC-26BC7E9E,compliance_violation,"Supplier is not meeting on-time rate of 81.20%, indicating potential inefficiencies or communication breakdowns with Delta_Logistics.",Port / logistics congestion,Supplier capacity issues
+EXC-268102FB,defective_shipment,"Supplier Delta_Logistics has experienced a history of stockouts and quality issues, indicating a potential issue with their internal processes or supply chain management.",Port / logistics congestion,Supplier capacity issues
+EXC-B0E4C486,defective_shipment,Defective shipment due to incorrect quantity shipped by supplier.,Quality control,Quality control
+EXC-0173D089,defective_shipment,"Incorrect quantity shipped due to supplier's quality control issues, leading to defective shipments.",Quality control,Quality control
+EXC-A5C3DB98,defective_shipment,"Raw material shortage at supplier factory is the root cause of this issue, resulting in a defective shipment due to quality issues.",Supplier capacity issues,Supplier capacity issues
+EX-21032,Shipment Delay,"Shipment delay occurred due to port congestion at origin port, and the supplier has not provided an updated ETA.",Port / logistics congestion,Port / logistics congestion
+EXC-D78F2495,defective_shipment,Delta Logistics supplier has a history of quality issues and stockouts due to raw material shortages at their factories.,Port / logistics congestion,Supplier capacity issues

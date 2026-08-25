@@ -40,3 +40,4 @@ backend/.env
 backend/eval_harness/results.csv
 backend/.env
 .lovable/
+.env

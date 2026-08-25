@@ -26,7 +26,7 @@ def _already_notified(cur, exception_id: str) -> bool:
         WHERE exception_id = %s AND step = 'SLA Breach'
         LIMIT 1
     """, (exception_id,))
-    return cur.fetchone() is not None
+    return cur.fetchone() is not None 
 
 
 def _notify_sla_breach(exception_id: str, severity: str, hours_overdue: float = None) -> str:

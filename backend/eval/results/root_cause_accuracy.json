@@ -1,0 +1,47 @@
+{
+  "n": 40,
+  "correct": 25,
+  "accuracy_pct": 62.5,
+  "perCategory": {
+    "Port / logistics congestion": {
+      "tp": 13,
+      "fp": 13,
+      "fn": 0,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.667
+    },
+    "Customs / documentation": {
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "Supplier capacity issues": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 14,
+      "precision": 1.0,
+      "recall": 0.176,
+      "f1": 0.299
+    },
+    "Quality control": {
+      "tp": 8,
+      "fp": 2,
+      "fn": 0,
+      "precision": 0.8,
+      "recall": 1.0,
+      "f1": 0.889
+    },
+    "Other": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": null,
+      "recall": 0.0,
+      "f1": null
+    }
+  }
+}
