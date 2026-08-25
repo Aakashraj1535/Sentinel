@@ -41,3 +41,13 @@ backend/eval_harness/results.csv
 backend/.env
 .lovable/
 .env
+<<<<<<< HEAD
+=======
+.env
+
+.env
+backend/.env
+
+.env
+backend/.env
+>>>>>>> 7bba09c (Add financial impact card and panel ,rootcause test using hybrid approach)
