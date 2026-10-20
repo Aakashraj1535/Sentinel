@@ -8,13 +8,17 @@ import {
   Sparkles,
   Send,
   Bell,
+  StickyNote,
+  Tag,
+  IndianRupee,
+  AlertTriangle,
+  Activity,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import {
   fetchActivityLog,
   relativeTime,
   type ActivityLogEntry,
-  type ActivityStep,
 } from "@/lib/activity-log-api";
 import { cn } from "@/lib/utils";
 
@@ -125,10 +129,13 @@ function ActivityLogPage() {
   );
 }
 
-const stepConfig: Record<
-  ActivityStep,
-  { icon: React.ComponentType<{ className?: string }>; label: string; tone: string }
-> = {
+type StepStyle = {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  tone: string;
+};
+
+const stepConfig: Record<string, StepStyle> = {
   Detected: {
     icon: Search,
     label: "Detected",
@@ -149,6 +156,11 @@ const stepConfig: Record<
     label: "Decided",
     tone: "success",
   },
+  Resolved: {
+    icon: CheckCircle2,
+    label: "Resolved",
+    tone: "success",
+  },
   Reported: {
     icon: Send,
     label: "Reported",
@@ -159,10 +171,52 @@ const stepConfig: Record<
     label: "Notified",
     tone: "warning",
   },
+  Note: {
+    icon: StickyNote,
+    label: "Note",
+    tone: "muted",
+  },
+  "Root Cause Tagged": {
+    icon: Tag,
+    label: "Root Cause",
+    tone: "primary",
+  },
+  "Financial Impact Estimated": {
+    icon: IndianRupee,
+    label: "Impact Estimated",
+    tone: "warning",
+  },
+  "Financial Impact Skipped": {
+    icon: IndianRupee,
+    label: "Impact Skipped",
+    tone: "muted",
+  },
+  "SLA Breach": {
+    icon: AlertTriangle,
+    label: "SLA Breach",
+    tone: "danger",
+  },
 };
 
-function StepIcon({ step }: { step: ActivityStep }) {
-  const { icon: Icon, tone } = stepConfig[step];
+const fallbackStep: StepStyle = {
+  icon: Activity,
+  label: "Activity",
+  tone: "muted",
+};
+
+// Safe lookup: never returns undefined, so an unknown step from the backend
+// shows a generic badge instead of crashing the page.
+function getStepConfig(step: string): StepStyle {
+  if (!step) return fallbackStep;
+  const normalized = step.charAt(0).toUpperCase() + step.slice(1); // "detected" -> "Detected"
+  return (
+    stepConfig[step] ??
+    stepConfig[normalized] ?? { ...fallbackStep, label: step }
+  );
+}
+
+function StepIcon({ step }: { step: string }) {
+  const { icon: Icon, tone } = getStepConfig(step);
   const toneClasses: Record<string, string> = {
     info: "bg-[color-mix(in_oklab,var(--info)_18%,transparent)] text-info",
     warning:
@@ -171,6 +225,8 @@ function StepIcon({ step }: { step: ActivityStep }) {
       "bg-[color-mix(in_oklab,var(--primary)_18%,transparent)] text-primary",
     success:
       "bg-[color-mix(in_oklab,var(--success)_18%,transparent)] text-success",
+    danger:
+      "bg-[color-mix(in_oklab,var(--danger)_18%,transparent)] text-danger",
     muted:
       "bg-[color-mix(in_oklab,var(--muted-foreground)_18%,transparent)] text-muted-foreground",
   };
@@ -178,7 +234,7 @@ function StepIcon({ step }: { step: ActivityStep }) {
     <div
       className={cn(
         "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
-        toneClasses[tone],
+        toneClasses[tone] ?? toneClasses.muted,
       )}
     >
       <Icon className="h-4 w-4" />
@@ -186,8 +242,8 @@ function StepIcon({ step }: { step: ActivityStep }) {
   );
 }
 
-function StepTag({ step }: { step: ActivityStep }) {
-  const { label, tone } = stepConfig[step];
+function StepTag({ step }: { step: string }) {
+  const { label, tone } = getStepConfig(step);
   const toneClasses: Record<string, string> = {
     info: "bg-[color-mix(in_oklab,var(--info)_15%,transparent)] text-[color-mix(in_oklab,var(--info)_55%,black)] border-[color-mix(in_oklab,var(--info)_35%,transparent)]",
     warning:
@@ -196,14 +252,15 @@ function StepTag({ step }: { step: ActivityStep }) {
       "bg-[color-mix(in_oklab,var(--primary)_15%,transparent)] text-[color-mix(in_oklab,var(--primary)_55%,black)] border-[color-mix(in_oklab,var(--primary)_35%,transparent)]",
     success:
       "bg-[color-mix(in_oklab,var(--success)_15%,transparent)] text-[color-mix(in_oklab,var(--success)_50%,black)] border-[color-mix(in_oklab,var(--success)_30%,transparent)]",
-    muted:
-      "bg-muted text-muted-foreground border-border",
+    danger:
+      "bg-[color-mix(in_oklab,var(--danger)_15%,transparent)] text-[color-mix(in_oklab,var(--danger)_55%,black)] border-[color-mix(in_oklab,var(--danger)_35%,transparent)]",
+    muted: "bg-muted text-muted-foreground border-border",
   };
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide",
-        toneClasses[tone],
+        toneClasses[tone] ?? toneClasses.muted,
       )}
     >
       {label}
